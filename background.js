@@ -46,8 +46,15 @@ chrome.runtime.onMessage.addListener(
       		method:"GET",
       		url:url,
       		complete:function(xhr){
+      			xhr = xhr.responseText
       			var neededHtml = xhr.substr(xhr.indexOf("{"),xhr.lastIndexOf("}") - xhr.indexOf("{") +1)
       			
+
+      			var replaceArr = ["content","IfHasScb","hjd_langs","WordId","FromLang","ToLang"]
+      			for (var i = 0; i < replaceArr.length; i++) {
+      				neededHtml = neededHtml.replace(""+replaceArr[i], "\"" + replaceArr[i] + "\"")
+      			}
+
       			var data = {
       				key:"result",
       				content:neededHtml
