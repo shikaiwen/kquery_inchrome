@@ -48,8 +48,10 @@ chrome.runtime.onMessage.addListener(
 		// var desc = $(holderElt).find("#hjd_wordcomment_1").val();
 		
 
+		var currPageProtocal = location.href.substr(0,location.href.indexOf("/")+2)
+		var relcnt = json.content.replace("http://",currPageProtocal);
 
-		$(div).html(json.content)
+		$(div).html(relcnt)
 
 
 		$(div).css("left",pageX);
@@ -65,11 +67,15 @@ chrome.runtime.onMessage.addListener(
 );
 
 var selectedText;
+var clientX;
+var clientY;
 var pageX;
 var pageY;
 document.addEventListener("mouseup", function(e) {
   	// var text = document.selection.createRange().text
   	selectedText = window.getSelection().toString();
+  	clientX = e.clientX;
+  	clientY = e.clientY;
   	pageX = e.pageX;
   	pageY = e.pageY;
 });
@@ -85,8 +91,8 @@ $(document).on("click",function(e){
 
 	if($("#wordmempanel").length != 1 ) return;
 
-	var ex = e.pageX;
-	var ey = e.pageY;
+	var ex = e.clientX;
+	var ey = e.clientY;
 
 	var rect = $("#wordmempanel")[0].getBoundingClientRect();
 	var x = rect.x;
