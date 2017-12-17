@@ -10,67 +10,93 @@
 chrome.contextMenus.create({
 	title: "search %s in dictionary",
 	contexts: ["selection"],
-	onclick: function(info, tab) {
-		// sendSearch(info.selectionText);
-		var word = info.selectionText;
-		if(!word) return;
-
-		// alert(JSON.stringify())
-
-		chrome.tabs.query({
-			active: true,
-			currentWindow: true
-		}, function(tabs) {
-			var activeTab = tabs[0];
-			chrome.tabs.sendMessage(activeTab.id, {
-				"key": "query",
-				"word":word
-			});
-		});
-
-
-	}
+	onclick: itemClicked
 });
 
 
+function itemClicked(info, tab){
+      // sendSearch(info.selectionText);
+    var word = info.selectionText;
+    if(!word) return;
+
+    var url = "https://dict.hjenglish.com/services/simpleExplain/jp_simpleExplain.ashx?type=jc&w="+word;
+    // chrome.tabs.create({"url": url});
+    // alert("background.js "+ JSON.stringify(request))
+
+    $.post(url,function(xhr){
+        var neededHtml = xhr.substr(xhr.indexOf("{"),xhr.lastIndexOf("}") - xhr.indexOf("{") +1)
+        
+
+        var replaceArr = ["content","IfHasScb","hjd_langs","WordId","FromLang","ToLang"]
+        for (var i = 0; i < replaceArr.length; i++) {
+          neededHtml = neededHtml.replace(""+replaceArr[i], "\"" + replaceArr[i] + "\"")
+        }
+
+
+
+        var returnobj = {
+          key:"queryresult",
+          msg: {}
+        }
+
+        returnobj.msg['content'] = neededHtml;
+        var userid = "me";
+
+        // is the word exists?
+        $.post("http://127.0.0.1:8000/polls/chrome_kquery/wordexists/"+userid+"?w="+word,function(xhr2){
+
+          returnobj.msg['exists'] = xhr2.exists;
+          
+          sendToActiveTab(returnobj);
+        });
+
+        
+    });
+
+
+}
+
+
 chrome.runtime.onMessage.addListener(
+
   function(request, sender, sendResponse) {
 
-    if( request.key == "crossquery" ) {
-
+    if( request.key == "query" ) {
     	// var url = "https://dict.hjenglish.com/jp/jc/" + request.word;
-    	var url = "https://dict.hjenglish.com/services/simpleExplain/jp_simpleExplain.ashx?type=jc&w="+request.word;
-      	// chrome.tabs.create({"url": url});
-      	// alert("background.js "+ JSON.stringify(request))
-      	$.ajax({
-      		method:"GET",
-      		url:url,
-      		complete:function(xhr){
-      			xhr = xhr.responseText
-      			var neededHtml = xhr.substr(xhr.indexOf("{"),xhr.lastIndexOf("}") - xhr.indexOf("{") +1)
-      			
-
-      			var replaceArr = ["content","IfHasScb","hjd_langs","WordId","FromLang","ToLang"]
-      			for (var i = 0; i < replaceArr.length; i++) {
-      				neededHtml = neededHtml.replace(""+replaceArr[i], "\"" + replaceArr[i] + "\"")
-      			}
-
-      			var data = {
-      				key:"result",
-      				content:neededHtml
-      			}
-      			sendToActiveTab(data);
-      		},
-      		success:function(xhr){
-
-      		},
-      		error:function(xhr){
-      			alert("access error:"+ url)
-      		}
-      	})
+ 
 
 
     }
+
+
+
+    if(key == "saveword"){
+        var info = request.msg;
+
+          $.ajax({
+            method:"POST",
+            data:info,
+            url:"http://127.0.0.1:8000/polls/chrome_kquery/saveword",
+            complete:function(xhr){
+              var resp = xhr.responseText
+
+              var data = {
+                key:"savewordresult",
+                msg:resp
+              }
+              sendToActiveTab(data);
+            },
+            success:function(xhr){
+
+            },
+            error:function(xhr){
+              alert("access error:"+ url)
+            }
+        });
+
+
+    }
+
   }
 );
 

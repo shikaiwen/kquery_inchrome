@@ -15,6 +15,7 @@
     // "default_popup": "popup.html",
     // "default_title":"Click here!"
   },
+  "web_accessible_resources": ["btn_myword_add.gif","btn_myword_del.gif"],
   "permissions": [
     "contextMenus",
     "activeTab",

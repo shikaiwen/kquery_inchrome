@@ -7,21 +7,11 @@ chrome.runtime.onMessage.addListener(
   	
   	// alert("content.js "+ JSON.stringify(request))
 
-    if( request.key == "query" ) {
-         // var firstHref = $("a[href^='http']").eq(0).attr("href");
-      	chrome.runtime.sendMessage({"key": "crossquery", "word": request.word});
-      	// alert(1)
-
-
-// 			var url = "https://dict.hjenglish.com/jp/jc/" + request.word;
-  //     	var container = $("<iframe id='wordmem'/>");
-  //     	$(container).attr("src",url);
-
-
-
-    }else if(request.key == "result"){
-
-
+    // if( request.key == "queryreq" ) {
+    //   	chrome.runtime.sendMessage({"key": "query", "word": request.word});
+    // }else 
+    
+    if(request.key == "queryresult"){
 
     	var style = "<style type=\"text/css\">\n" +
 		"\t#wordmempanel {\n" +
@@ -40,18 +30,43 @@ chrome.runtime.onMessage.addListener(
 
 		var div =  $("<div id=\"wordmempanel\">");
 
-		var json = JSON.parse(request.content);
-
-		// detail information
-		// var holderElt = $("<div>").html(json.content);
-		// var spanArr = $(holderElt).find("span");
-		// var desc = $(holderElt).find("#hjd_wordcomment_1").val();
-		
+		var json = JSON.parse(request.msg.content);
 
 		var currPageProtocal = location.href.substr(0,location.href.indexOf("/")+2)
 		var relcnt = json.content.replace("http://",currPageProtocal);
 
-		$(div).html(relcnt)
+		$(div).html(relcnt);
+
+		// word(单词) jm(英文假名) roma(罗马假名) sd(声调) fyf(说明内容，用换行符号分割)
+		var data = {
+			"word": $(div).find("span.hjd_Green > font").html(),
+			"jm":$(div).find("span:nth-child(2)").html(),
+			"roma":$(div).find("span:nth-child(3)").html(),
+			"sd":$(div).find("span:nth-child(4)").html(),
+			"fyf":$(div).find("#hjd_wordcomment_1").val()
+		}
+
+
+		// change the word img if alreay been saved
+		var pluginid = chrome.runtime.id;
+		var imgdel = chrome.extension.getURL('btn_myword_del.gif');
+		var imgadd = chrome.extension.getURL('btn_myword_add.gif');
+
+
+		var img = $(div).find("#hjd_simple_amw_panel_1 img");
+		img.attr("src",request.msg.exists == 1 ? imgdel : imgadd);
+
+		img.attr("alt", request.msg.exists ?  "添加到生词本" :  "点击删除");
+		img.parent().attr("title","点击删除");
+
+		if(request.msg.exists){
+			$(div).find("#hjd_simple_amw_panel_1").append($("<span>").html("已添加"));
+		}
+		
+
+		
+
+		$(div).attr("info",JSON.stringify(data));
 
 
 		$(div).css("left",pageX);
@@ -60,6 +75,11 @@ chrome.runtime.onMessage.addListener(
 		$("html").append($(style));
 		$("html").append($(div));
 
+    }else if(request.key == "savewordresult"){
+    		var msg = request.msg;
+    		if(msg.code == 1){
+
+    		}
     }
 
 
@@ -85,9 +105,21 @@ document.addEventListener("mouseup", function(e) {
 // 	$(this).remove()
 // });
 
+$(document).delegate("#hjd_addword_image_1","click",function(){
+
+
+	var pluginid = chrome.runtime.id;
+
+	var imgurl = chrome.extension.getURL('btn_myword_del.gif');
+
+	$(this).find("img").attr("src",imgurl);
+	
+	// var info = $.parseJSON($(this).parents("div").attr("info"));
+	// chrome.runtime.sendMessage({"key": "saveword", "msg": info});
+
+});
 
 $(document).on("click",function(e){
-
 
 	if($("#wordmempanel").length != 1 ) return;
 
