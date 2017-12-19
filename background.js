@@ -42,13 +42,13 @@ function itemClicked(info, tab){
         returnobj.msg['content'] = neededHtml;
         var userid = "me";
 
-        // is the word exists?
-        $.post("http://127.0.0.1:8000/polls/chrome_kquery/wordexists/"+userid+"?w="+word,function(xhr2){
+        sendToActiveTab(returnobj);
 
-          returnobj.msg['exists'] = xhr2.exists;
-          
-          sendToActiveTab(returnobj);
-        });
+        // is the word exists?
+        // $.post("http://127.0.0.1:8000/polls/chrome_kquery/wordexists/"+userid+"?w="+word,function(xhr2){
+        //   returnobj.msg['exists'] = xhr2.exists;
+        //   sendToActiveTab(returnobj);
+        // });
 
         
     });
@@ -70,7 +70,7 @@ chrome.runtime.onMessage.addListener(
 
 
 
-    if(key == "saveword"){
+    if(request.key == "saveword"){
         var info = request.msg;
 
           $.ajax({
@@ -109,6 +109,7 @@ function sendToActiveTab(data) {
 	}, function(tabs) {
 		var activeTab = tabs[0];
 		chrome.tabs.sendMessage(activeTab.id, data);
+    // chrome.runtime.sendMessage(data);
 	});
 
 }

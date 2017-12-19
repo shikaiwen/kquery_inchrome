@@ -1,6 +1,62 @@
 
+// https://dev-trade.sbifxt.co.jp/web/pc/Home
+//9972687425 000000 施凱文
 
 // content.js
+
+
+$(document).ready(function(){
+
+	        $.ajax({
+            url: chrome.extension.getURL('/template.html'),
+            success: function(data) {
+                templatesCnt = $('<div></div>').append($.parseHTML(data)).find('[type="template"]'),
+                templatesCnt.each(function(){
+                    templates[this.id] = this.innerHTML;
+                });
+
+                // return resolve(templates);
+            }
+        });
+
+});
+
+
+
+localres = {
+
+	"btn_myword_del":chrome.extension.getURL('btn_myword_del.gif'),
+	"btn_myword_add":chrome.extension.getURL('btn_myword_add.gif'),
+}
+templates = {};
+pluginPageManager = {}
+pluginPageManager.newWordPanel = function(){
+
+	var template = templates["paneltemp"];
+	template = $(template).clone();
+
+	// 当ページに単語panel存在するかとかチェクします
+	var existedPanelCnt = $(document).find("[name='wordmempanel']").length;
+	$(template).attr("id","wordmempanel_"+existedPanelCnt );
+	$(template).attr("name","wordmempanel_"+existedPanelCnt );
+
+	return template;
+}
+
+pluginPageManager.nowordpaneltemp = function(){
+
+	var template = templates["nowordpaneltemp"];
+	template = $(template).clone();
+	return template;
+}
+
+
+pluginPageManager.getTopPanel = function(){
+	var list = $("[name^=wordmempanel]");
+	return list.length >0 ? list[list.length -1] : null ;
+}
+
+
 
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
@@ -13,27 +69,16 @@ chrome.runtime.onMessage.addListener(
     
     if(request.key == "queryresult"){
 
-    	var style = "<style type=\"text/css\">\n" +
-		"\t#wordmempanel {\n" +
-		"\t    width: 266px; font-size:12px;\n" +
-		"\t    padding: 10px;\n" +
-		"\t    background-color: wheat;\n" +
-		"\t    padding-bottom: 30px;\n" +
-		"\t    z-index: 100;\n" +
-		"\t    height: 222px;\n" +
-		"\t    position: absolute;\n" +
-		"\t    border: red solid 1.5px;\n" +
-		"\t    left: 29px;\n" +
-		"\t    top: 32px;\n" +
-		"\t}\n" +
-		"</style>\n" ;
 
-		var div =  $("<div id=\"wordmempanel\">");
+		 //$(templates.getPanel());
+
+		var div =  $("<div>");
 
 		var json = JSON.parse(request.msg.content);
 
 		var currPageProtocal = location.href.substr(0,location.href.indexOf("/")+2)
 		var relcnt = json.content.replace("http://",currPageProtocal);
+
 
 		$(div).html(relcnt);
 
@@ -46,34 +91,43 @@ chrome.runtime.onMessage.addListener(
 			"fyf":$(div).find("#hjd_wordcomment_1").val()
 		}
 
+		var container = pluginPageManager.newWordPanel() 
+		if(!data.word){
+			container = pluginPageManager.nowordpaneltemp();
+
+		}else{
+			// 今、ダータをとったまま、設置します
+			$(container).find("[name='word']").html(data.word);
+			$(container).find("[name='jm']").html(data.jm);
+			$(container).find("[name='roma']").html(data.roma);
+			$(container).find("[name='sd']").html(data.sd);
+			$(container).find("[name='fyf']").val(data.fyf);
+			$(container).find("[name='fyfdetail']").html(data.fyf.split("\n").join("<br>"));
+		}
+
 
 		// change the word img if alreay been saved
-		var pluginid = chrome.runtime.id;
-		var imgdel = chrome.extension.getURL('btn_myword_del.gif');
-		var imgadd = chrome.extension.getURL('btn_myword_add.gif');
-
-
-		var img = $(div).find("#hjd_simple_amw_panel_1 img");
-		img.attr("src",request.msg.exists == 1 ? imgdel : imgadd);
-
-		img.attr("alt", request.msg.exists ?  "添加到生词本" :  "点击删除");
-		img.parent().attr("title","点击删除");
-
-		if(request.msg.exists){
-			$(div).find("#hjd_simple_amw_panel_1").append($("<span>").html("已添加"));
-		}
+		// var pluginid = chrome.runtime.id;
+		// var imgdel = chrome.extension.getURL('btn_myword_del.gif');
+		// var imgadd = chrome.extension.getURL('btn_myword_add.gif');
+		// var img = $(container).find("#hjd_simple_amw_panel_1 img");
+		// img.attr("src",request.msg.exists == 1 ? imgdel : imgadd);
+		// img.attr("alt", request.msg.exists ? "点击删除" : "添加到生词本");
+		// img.parent().attr("title", request.msg.exists ? "点击删除" : "添加到生词本");
+		// if(request.msg.exists){
+		// 	$(container).find("#hjd_simple_amw_panel_1").append($("<span>").html("已添加"));
+		// 	$(img).attr("exists","1");
+		// }
 		
 
-		
+		$(container).attr("info",JSON.stringify(data));
+		// エレメントのレイアウト設定
+		$(container).css("left",pageX);
+		$(container).css("top",pageY);
+		$(container).append(templates.panelstyletemp);
+		$("html").append($(container));
 
-		$(div).attr("info",JSON.stringify(data));
-
-
-		$(div).css("left",pageX);
-		$(div).css("top",pageY);
-
-		$("html").append($(style));
-		$("html").append($(div));
+		initWordStatus(data.word);
 
     }else if(request.key == "savewordresult"){
     		var msg = request.msg;
@@ -105,6 +159,61 @@ document.addEventListener("mouseup", function(e) {
 // 	$(this).remove()
 // });
 
+// 単語の状態によって表示の文字を設定します
+function initWordStatus(word){
+
+	if(!word) return;
+	var json = getCurrentPanelWordInfo();
+
+
+
+
+	DB.syncGet(word).then(function(items) {
+
+		var exists = (word in items) ? 1 : 0
+
+		var pluginid = chrome.runtime.id;
+		var imgdel = chrome.extension.getURL('btn_myword_del.gif');
+		var imgadd = chrome.extension.getURL('btn_myword_add.gif');
+
+		var container = pluginPageManager.getTopPanel();
+		var img = $(container).find("#hjd_simple_amw_panel_1 img");
+		img.attr("src", exists ? imgdel : imgadd);
+
+		img.attr("alt", exists ? "点击删除" : "添加到生词本");
+		img.parent().attr("title", exists ? "点击删除" : "添加到生词本");
+
+		if (exists) {
+			$(container).find("#hjd_simple_amw_panel_1").append($("<span>").html("已添加"));
+			$(img).attr("exists", "1");
+		}
+
+	});
+
+
+
+	// getSynData(word).then(function(data){
+	// 	var exists = (word in data) ? 1 : 0 
+	// 	var pluginid = chrome.runtime.id;
+	// 	var imgdel = chrome.extension.getURL('btn_myword_del.gif');
+	// 	var imgadd = chrome.extension.getURL('btn_myword_add.gif');
+	// 	var container = $("#wordmempanel")
+	// 	var img = $(container).find("#hjd_simple_amw_panel_1 img");
+	// 	img.attr("src",exists ? imgdel : imgadd);
+
+	// 	img.attr("alt", exists ? "点击删除" : "添加到生词本");
+	// 	img.parent().attr("title", exists ? "点击删除" : "添加到生词本");
+
+	// 	if(exists){
+	// 		$(container).find("#hjd_simple_amw_panel_1").append($("<span>").html("已添加"));
+	// 		$(img).attr("exists","1");
+	// 	}
+	// });
+
+}
+
+
+
 $(document).delegate("#hjd_addword_image_1","click",function(){
 
 
@@ -112,40 +221,135 @@ $(document).delegate("#hjd_addword_image_1","click",function(){
 
 	var imgurl = chrome.extension.getURL('btn_myword_del.gif');
 
-	$(this).find("img").attr("src",imgurl);
+	var exists = $(this).attr("exists")
+
+	var json = getCurrentPanelWordInfo(this);
+	
+	var data = {
+		"word":json.word ,
+		"exists":exists
+	}
+	var wordkey = json["word"];
+	var timestamp = new Date().getTime();
+
+	var syndata = {}
+	var wordkey = json.word;
+	syndata[wordkey] = json;
+
+	DB.syncSet(syndata).then(function(result){
+		initWordStatus(json.word)
+	});
+
+
+	// chrome.runtime.sendMessage({"key": "saveoraddword", "msg": json});
+	// $(this).find("img").attr("src",imgurl);
 	
 	// var info = $.parseJSON($(this).parents("div").attr("info"));
 	// chrome.runtime.sendMessage({"key": "saveword", "msg": info});
 
 });
 
+
+
+$(document).delegate("#wordlib","click",function(){
+	var pluginId = chrome.runtime.id;
+	datatube.front.request_openTab("chrome://extensions/"+pluginId+"/wordlib.html")
+});
+
+
+
+chrome.storage.onChanged.addListener(function(changes, namespace) {
+for (key in changes) {
+  var storageChange = changes[key];
+  console.log('Storage key "%s" in namespace "%s" changed. ' +
+              'Old value was "%s", new value is "%s".',
+              key,
+              namespace,
+              storageChange.oldValue,
+              storageChange.newValue);
+}
+});
+
+
+var DB = {}
+DB.set = function(data,callback){
+	chrome.storage.sync.set(data, function(items) {
+		callback(items);
+	});
+}
+DB.syncSet = function(data){
+
+	const promise = new Promise(function(resolve, reject) {
+		chrome.storage.sync.set(data, function(items) {
+			resolve(items);
+		});
+	});
+	return promise;
+}
+
+
+DB.syncGet = function(word){
+
+	const promise = new Promise(function(resolve, reject) {
+		chrome.storage.sync.get(word, function(items) {
+			resolve(items);
+		});
+	});
+
+	return promise;
+}
+
+DB.get = function(data, callback) {
+
+	chrome.storage.sync.get(data, function(items) {
+		callback(items);
+	});
+}
+
+
+function getCurrentPanelWordInfo(eltInPanel){
+
+
+	var parentDiv = pluginPageManager.getTopPanel();
+	if(!parentDiv) return;
+	var info = $(parentDiv).attr("info")
+	if(!info) return;
+	var infojson = $.parseJSON(info)
+	return infojson;
+}
+
+
 $(document).on("click",function(e){
 
-	if($("#wordmempanel").length != 1 ) return;
+	var panel = pluginPageManager.getTopPanel();
+	if(!panel) return;
 
 	var ex = e.clientX;
 	var ey = e.clientY;
 
-	var rect = $("#wordmempanel")[0].getBoundingClientRect();
+	var rect = panel.getBoundingClientRect();
 	var x = rect.x;
 	var y = rect.y;
 	var width = rect.width;
 	var height = rect.height;
 
 	if(!(  (ex > x && ey > y ) && (ex < (x + width)  && ey > y) && (ex >x && ey < (ey +height)) && (ex < (x + width) && ey < (y + height) )  )){
-		$("#wordmempanel").remove();
+		$(panel).remove();
 	}
 
-})
+	initWordStatus()
 
-
-// jQuery(document).delegate("#wordmempanel","click",function(e){
-
-
-// });
+});
 
 
 
+// バクグランドとのコミュニケーション対象
+// Background = {}
+// Background.openTab = function(url){
+
+//      chrome.runtime.sendMessage({"key": "openTab", "url": url});
+
+// }
 
 // var relayEvent = function(element, target, eventName, fn){
 
