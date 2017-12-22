@@ -1,4 +1,6 @@
 
+// shortcut :  https://developer.chrome.com/extensions/commands 
+
 datatube = {}
 
 var isBackground = function(){
