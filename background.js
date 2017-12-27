@@ -7,17 +7,37 @@
 // 	"onclick": queryWord
 // });
 
-chrome.contextMenus.create({
-	title: "search %s in dictionary",
-	contexts: ["selection"],
-	onclick: itemClicked
+
+chrome.commands.onCommand.addListener(function(command) {
+  console.log('Command:', command);
+
+    datatube.backend.request_getSelectedText(function(text){
+        toQuery(text);
+    })
 });
 
 
-function itemClicked(info, tab){
-      // sendSearch(info.selectionText);
-    var word = info.selectionText;
-    if(!word) return;
+
+
+chrome.contextMenus.create({
+	title: "search %s in dictionary",
+	contexts: ["selection"],
+	onclick: function(info,tab){
+      var text = info.selectionText;
+      toQuery(text);
+  }
+});
+
+
+function toQuery(text){
+  if(!$.trim(text)) return;
+
+  doQuery($.trim(text));
+}
+
+
+
+function doQuery(word){
 
     var url = "https://dict.hjenglish.com/services/simpleExplain/jp_simpleExplain.ashx?type=jc&w="+word;
     // chrome.tabs.create({"url": url});

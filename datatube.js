@@ -21,21 +21,31 @@ if (!isBackground) {
 
 
 
+	datatube.front.handle_getSelectedText = function(){
+
+		return currentSelectedText;
+
+	}
+
 
 	//font end
 	chrome.runtime.onMessage.addListener(
 		function(request, sender, sendResponse) {
 
 
-
-			// chrome.runtime.sendMessage({
-			// 	"key": "openTab",
-			// 	"url": url
-			// });
+			if(request.key == "getSelectedText"){
+				chrome.runtime.sendMessage({
+					"key": "getSelectedTextResult",
+					"val": datatube.front.handle_getSelectedText()
+				});
+			}
 
 
 		}
 	);
+
+
+
 
 }else{
 
@@ -48,6 +58,19 @@ if (!isBackground) {
 		// chrome.tabs.create({ 'url': 'chrome://extensions/?options=' + chrome.runtime.id });
 	}
 
+	datatube.backend.request_getSelectedText = function(callback){
+		datatube.backend.request_getSelectedText_callback =  callback;
+		var reqData = {} 
+		reqData["key"] = "getSelectedText";
+		chrome.tabs.query({
+			active: true,
+			currentWindow: true
+		}, function(tabs) {
+			var activeTab = tabs[0];
+			chrome.tabs.sendMessage(activeTab.id, reqData);
+		});
+
+	}
 
 	// backend
 	chrome.runtime.onMessage.addListener(
@@ -57,6 +80,11 @@ if (!isBackground) {
 	    	
 	 		datatube.backend.handle_openTab(request.url)
 	    }
+
+	    if(request.key == "getSelectedTextResult"){
+	    	datatube.backend.request_getSelectedText_callback(request.val);
+	    }
+
 
 		// var info = request.msg;
 

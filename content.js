@@ -192,23 +192,7 @@ function initWordStatus(word){
 
 
 
-	// getSynData(word).then(function(data){
-	// 	var exists = (word in data) ? 1 : 0 
-	// 	var pluginid = chrome.runtime.id;
-	// 	var imgdel = chrome.extension.getURL('btn_myword_del.gif');
-	// 	var imgadd = chrome.extension.getURL('btn_myword_add.gif');
-	// 	var container = $("#wordmempanel")
-	// 	var img = $(container).find("#hjd_simple_amw_panel_1 img");
-	// 	img.attr("src",exists ? imgdel : imgadd);
 
-	// 	img.attr("alt", exists ? "点击删除" : "添加到生词本");
-	// 	img.parent().attr("title", exists ? "点击删除" : "添加到生词本");
-
-	// 	if(exists){
-	// 		$(container).find("#hjd_simple_amw_panel_1").append($("<span>").html("已添加"));
-	// 		$(img).attr("exists","1");
-	// 	}
-	// });
 
 }
 
@@ -306,6 +290,29 @@ $(document).on("click",function(e){
 	initWordStatus()
 
 });
+
+
+
+
+document.onmouseup = document.onkeyup = document.onselectionchange = function() {
+  	currentSelectedText = getSelectionText();
+};
+
+function getSelectionText() {
+    var text = "";
+    var activeEl = document.activeElement;
+    var activeElTagName = activeEl ? activeEl.tagName.toLowerCase() : null;
+    if (
+      (activeElTagName == "textarea") || (activeElTagName == "input" &&
+      /^(?:text|search|password|tel|url)$/i.test(activeEl.type)) &&
+      (typeof activeEl.selectionStart == "number")
+    ) {
+        text = activeEl.value.slice(activeEl.selectionStart, activeEl.selectionEnd);
+    } else if (window.getSelection) {
+        text = window.getSelection().toString();
+    }
+    return text;
+}
 
 
 
