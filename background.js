@@ -2,15 +2,16 @@
 
 
 // Create a parent item and two children.
-// var parent = chrome.contextMenus.create({
-// 	"title": "queryWord",
-// 	"onclick": queryWord
-// });
+var parent = chrome.contextMenus.create({
+	"title": "queryWord",
+	"onclick": function(){
+    showEmptyPanel()
+  }
+});
 
 
 chrome.commands.onCommand.addListener(function(command) {
-  console.log('Command:', command);
-
+    // console.log('Command:', command);
     datatube.backend.request_getSelectedText(function(text){
         toQuery(text);
     })
@@ -27,6 +28,11 @@ chrome.contextMenus.create({
       toQuery(text);
   }
 });
+
+//显示空panel
+function showEmptyPanel(){
+
+}
 
 
 function toQuery(text){

@@ -85,8 +85,8 @@ chrome.runtime.onMessage.addListener(
 		// word(单词) jm(英文假名) roma(罗马假名) sd(声调) fyf(说明内容，用换行符号分割)
 		var data = {
 			"word": $(div).find("span.hjd_Green > font").html(),
-			"jm":$(div).find("span:nth-child(2)").html(),
-			"roma":$(div).find("span:nth-child(3)").html(),
+			"roma":$(div).find("span:nth-child(2)").html(),
+			"jm":$(div).find("span:nth-child(3)").html(),
 			"sd":$(div).find("span:nth-child(4)").html(),
 			"fyf":$(div).find("#hjd_wordcomment_1").val()
 		}
@@ -97,11 +97,11 @@ chrome.runtime.onMessage.addListener(
 
 		}else{
 			// 今、ダータをとったまま、設置します
-			$(container).find("[name='word']").html(data.word);
-			$(container).find("[name='jm']").html(data.jm);
-			$(container).find("[name='roma']").html(data.roma);
-			$(container).find("[name='sd']").html(data.sd);
-			$(container).find("[name='fyf']").val(data.fyf);
+			$(container).find("[name='word']").html(data.word);	//单词
+			$(container).find("[name='jm']").html(data.jm);   //日文假名， 沪江词典命名弄反了，这里修正过来
+			$(container).find("[name='roma']").html(data.roma);  //罗马音
+			$(container).find("[name='sd']").html(data.sd);  //　声调 0
+			$(container).find("[name='fyf']").val(data.fyf); //明细隐藏域
 			$(container).find("[name='fyfdetail']").html(data.fyf.split("\n").join("<br>"));
 		}
 

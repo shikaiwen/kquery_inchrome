@@ -1,7 +1,10 @@
 
 <html>
 
-
+<head>
+	  <meta charset="UTF-8">
+</head>
+<body>
 <style type="text/css">
 /*	#panel {
 	    width: 304px;
@@ -25,23 +28,62 @@
 	table tr td:nth-child(3){
 		max-width: 400px;
 	}*/
+
+	table {
+    /*table-layout: fixed;*/
+    /*word-wrap: break-word;*/
+	}
+
+	#panel button{
+		float: right;
+    	margin: 10 26px;
+	}
 </style>
 <link rel="stylesheet" href="./jquery-ui/jquery-ui.css">
+<link rel="stylesheet" href="./bootstrap4/css/bootstrap.css">
+
 <script type="text/javascript" src="./jquery-1.12.4.js"></script>
 <script type="text/javascript" src="./jquery-ui/jquery-ui.js"></script>
 <script type="text/javascript" src="./storage.js"></script>
 <script type="text/javascript" src="./options.js"></script>
+<script type="text/javascript" src="./papaparse.js"></script>
+<script type="javascript" src="./bootstrap4/js/bootstrap.js"></script>
+
 
 <div id="panel">
-	
+	<button type="button" id="export" class="btn btn-success">ExportAsCSV</button>
 </div>
 	
 	<div>
 
-<table id="content" >
+<table  >
 
 </table>
 
+
+
+
+<table class="table table-striped" id="content">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col" >No</th>
+      <th scope="col" >単語</th>
+      <th scope="col" >発音</th>
+      <th scope="col" >詳細説明</th>
+    </tr>
+  </thead>
+  <tbody>
+	<tr id="trTemplate" style="display: none;">
+	  <th scope="row"></th>
+	  <td>2</td>
+	  <td>Jacob</td>
+	  <td>Thornton</td>
+	</tr>
+  </tbody>
+</table>
+
 	</div>
+
+	</body>
 </html>
 

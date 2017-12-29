@@ -25,9 +25,9 @@
   "permissions": [
     "contextMenus",
     "activeTab",
-    "storage",
-    "http://*/",
-    "https://*/"
+    "storage"
+    // "http://*/",
+    // "https://*/"
   ],
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "options_page": "options.html",
