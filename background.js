@@ -3,15 +3,39 @@
 
 // Create a parent item and two children.
 var parent = chrome.contextMenus.create({
-	"title": "queryWord",
+	"title": "show query panel",
 	"onclick": function(){
-    showEmptyPanel()
+    sendToActiveTab({"key":"showQueryPanel"})
   }
 });
 
 
 chrome.commands.onCommand.addListener(function(command) {
     // console.log('Command:', command);
+
+  bg = chrome.extension.getBackgroundPage();        // get the background page
+  bg.document.body.innerHTML= "";                   // clear the background page
+
+  // add a DIV, contentEditable=true, to accept the paste action
+  var helperdiv = bg.document.createElement("div");
+  document.body.appendChild(helperdiv);
+  helperdiv.contentEditable = true;
+
+  // focus the helper div's content
+  var range = document.createRange();
+  range.selectNode(helperdiv);
+  window.getSelection().removeAllRanges();
+  window.getSelection().addRange(range);
+  helperdiv.focus();    
+
+  // trigger the paste action
+  bg.document.execCommand("Paste");
+
+  // read the clipboard contents from the helperdiv
+  var clipboardContents = helperdiv.innerHTML;
+    getTextDesendent($(clipboardContents))
+    alert(clipboardWant)
+    alert("length:" +clipboardContents.length +"\n"+clipboardContents)
     datatube.backend.request_getSelectedText(function(text){
         toQuery(text);
     })
@@ -19,6 +43,32 @@ chrome.commands.onCommand.addListener(function(command) {
 
 
 
+var clipboardWant = "";
+function getTextDesendent(elt){
+
+  var want = ""
+  var children = $(elt).contents()
+  for(var v=0; v<children.length; v++){
+    var item = children[v]
+    if(item.nodeType == Node.TEXT_NODE){
+        var text = $.trim($(item).text());
+        if(text){
+          clipboardWant = text;
+        }
+    }else{
+      getTextDesendent(item);
+    }
+  }
+
+  return want 
+}
+
+
+var getTextNodesIn = function(el) {
+    return $(el).find(":not(iframe)").addBack().contents().filter(function() {
+        return this.nodeType == 3;
+    });
+};
 
 chrome.contextMenus.create({
 	title: "search %s in dictionary",
@@ -29,21 +79,28 @@ chrome.contextMenus.create({
   }
 });
 
-//显示空panel
-function showEmptyPanel(){
 
-}
 
 
 function toQuery(text){
   if(!$.trim(text)) return;
 
-  doQuery($.trim(text));
+  doQuery($.trim(text), function(neededHtml){
+    
+      var returnobj = {
+        key:"queryresult",
+        val: {}
+      }
+
+      returnobj.val = neededHtml;
+      var userid = "me";
+      sendToActiveTab(returnobj);
+  });
 }
 
 
 
-function doQuery(word){
+function doQuery(word, callback){
 
     var url = "https://dict.hjenglish.com/services/simpleExplain/jp_simpleExplain.ashx?type=jc&w="+word;
     // chrome.tabs.create({"url": url});
@@ -60,23 +117,11 @@ function doQuery(word){
 
 
 
-        var returnobj = {
-          key:"queryresult",
-          msg: {}
-        }
 
-        returnobj.msg['content'] = neededHtml;
-        var userid = "me";
-
-        sendToActiveTab(returnobj);
-
-        // is the word exists?
-        // $.post("http://127.0.0.1:8000/polls/chrome_kquery/wordexists/"+userid+"?w="+word,function(xhr2){
-        //   returnobj.msg['exists'] = xhr2.exists;
-        //   sendToActiveTab(returnobj);
-        // });
 
         
+        callback(neededHtml);
+
     });
 
 

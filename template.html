@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	
+	<script type="text/javascript" src="jquery-1.12.4.js"></script>
 
 	<div id="panelstyletemp" type="template">
 		<style type="text/css">
@@ -19,13 +19,30 @@
 			    left: 29px;
 			    top: 32px;
 			}
+
+			.querypanel {
+			    min-width: 266px; 
+			    font-size:12px;
+			    padding: 10px;
+			    background-color: wheat;
+			    padding-bottom: 30px;
+			    z-index: 2147483647;
+			    min-height: 180px;
+			    position: absolute;
+			    border: red solid 1.5px;
+			    left: 29px;
+			    top: 32px;
+			}
+			#queryResultCnt{
+				margin-top: 10px;
+			}
+
 		</style>
 	</div>
 
 	<div id="paneltemp" type="template">
 		
 		<div id="wordmempanel" name="wordmempanel" class="wordmempanel" info="">
-
 				<div>
 					<a id="wordlib" style="cursor:pointer;">查看单词本</a>
 				</div>
@@ -43,6 +60,42 @@
 				<input name="fyf" id="hjd_wordcomment_1" type="hidden" value="">
 			 	<span name="fyfdetail">
 			 	</span>
+
+		</div>
+	</div>
+
+	<div id="queryPaneltemp" type="template">
+		
+		<div id="querypanel" name="" class="querypanel" info="">
+				<div id="closeIcon">
+					<img style="" alt="关闭" >
+					<div class="clearfix"></div>
+				</div>
+				<div>
+					<input type="input" name="qword" placeholder="単語を入力してください...">
+					<input type="button" name="" id="queryBtn" value="Query">
+				</div>
+
+				<div id="queryResultCnt">
+					<div>
+						<a id="wordlib" style="cursor:pointer;">查看单词本</a>
+					</div>
+					<span name="word" class="hjd_Green" title="日语单词">[<font color="red"></font>]</span> 
+					<span name="jm" title="假名">[hennkyaku]</span>
+					<span name="roma" class="hjd_Orange" title="罗马音">[へんきゃく]</span>
+					<span name="sd" title="声调" class="hjd_Orange">◎</span>
+					<span title="日语发音"></span>
+					<span id="hjd_simple_amw_panel_1" class="hjd_add_myword">
+						<a id="hjd_addword_image_1" href="###" class="hjd_simple_addword_image" title="点击删除">
+							<img align="absmiddle" src="chrome-extension://ighmhlcpmblhcmpmljmdnldmejkccpgg/btn_myword_add.gif" alt="点击删除" width="16" height="16">
+						</a>
+					</span>
+					<br>
+					<input name="fyf" id="hjd_wordcomment_1" type="hidden" value="">
+				 	<span name="fyfdetail">
+				 	</span>
+				</div>
+
 
 		</div>
 	</div>

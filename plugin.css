@@ -1,0 +1,11 @@
+#closeIcon img{
+	/*background-image:url('chrome-extension://__MSG_@@extension_id__/cancel.png');*/
+	content:url(chrome-extension://__MSG_@@extension_id__/cancel.png);
+	width: 15px;
+    height: 15px;
+    float: right;
+    cursor:pointer;
+}
+.clearfix{
+	clear: both;
+}
