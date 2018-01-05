@@ -50,84 +50,100 @@ pluginPageManager.nowordpaneltemp = function(){
 	return template;
 }
 
+pluginPageManager.newQueryPanel = function(){
+	var template = templates["queryPaneltemp"];
+	template = $(template).clone();
+	return template;
+}
 
 pluginPageManager.getTopPanel = function(){
 	var list = $("[name^=wordmempanel]");
 	return list.length >0 ? list[list.length -1] : null ;
 }
 
+function showQueryPanel(){
 
+	if($("#querypanel").length >0)return;
+	$(document).delegate("#querypanel img", "click", function(){
+		$("#querypanel").remove();
+	});
+
+	var panel = pluginPageManager.newQueryPanel()
+	$(panel).css("left",pageX);
+	$(panel).css("top",pageY);
+	$(panel).append(templates.panelstyletemp);
+	
+	$("#closeIcon img").attr("src", chrome.extension.getURL('cancel.png'));
+	$("html").append($(panel));
+}
+
+// 点击查询按钮
+$(document).delegate("#querypanel [type='button']", "click",function(){
+	var word = $(this).siblings("input").val();
+	datatube.front.request_queryWord(word,function(request){
+		var container = renderQueryResult(request)
+		$(container).removeClass("wordmempanel")
+		$("#querypanel #queryResultCnt").html(container);
+	});
+})
+
+function renderQueryResult(request){
+
+	var div =  $("<div>");
+
+	var json = JSON.parse(request);
+
+	var currPageProtocal = location.href.substr(0,location.href.indexOf("/")+2)
+	var relcnt = json.content.replace("http://",currPageProtocal);
+
+
+	$(div).html(relcnt);
+
+	// word(单词) jm(英文假名) roma(罗马假名) sd(声调) fyf(说明内容，用换行符号分割)
+	var data = {
+		"word": $(div).find("span.hjd_Green > font").html(),
+		"roma":$(div).find("span:nth-child(2)").html(),
+		"jm":$(div).find("span:nth-child(3)").html(),
+		"sd":$(div).find("span:nth-child(4)").html(),
+		"fyf":$(div).find("#hjd_wordcomment_1").val()
+	}
+
+	var container = pluginPageManager.newWordPanel() 
+	if(!data.word){
+		container = pluginPageManager.nowordpaneltemp();
+
+	}else{
+		// 今、ダータをとったまま、設置します
+		$(container).find("[name='word']").html(data.word);	//单词
+		$(container).find("[name='jm']").html(data.jm);   //日文假名， 沪江词典命名弄反了，这里修正过来
+		$(container).find("[name='roma']").html(data.roma);  //罗马音
+		$(container).find("[name='sd']").html(data.sd);  //　声调 0
+		$(container).find("[name='fyf']").val(data.fyf); //明细隐藏域
+		$(container).find("[name='fyfdetail']").html(data.fyf.split("\n").join("<br>"));
+	}
+
+
+
+	$(container).attr("info",JSON.stringify(data));
+
+
+	initWordStatus(data.word);
+	return container;
+
+}
 
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
   	
-  	// alert("content.js "+ JSON.stringify(request))
-
-    // if( request.key == "queryreq" ) {
-    //   	chrome.runtime.sendMessage({"key": "query", "word": request.word});
-    // }else 
     
     if(request.key == "queryresult"){
 
-
-		 //$(templates.getPanel());
-
-		var div =  $("<div>");
-
-		var json = JSON.parse(request.msg.content);
-
-		var currPageProtocal = location.href.substr(0,location.href.indexOf("/")+2)
-		var relcnt = json.content.replace("http://",currPageProtocal);
-
-
-		$(div).html(relcnt);
-
-		// word(单词) jm(英文假名) roma(罗马假名) sd(声调) fyf(说明内容，用换行符号分割)
-		var data = {
-			"word": $(div).find("span.hjd_Green > font").html(),
-			"roma":$(div).find("span:nth-child(2)").html(),
-			"jm":$(div).find("span:nth-child(3)").html(),
-			"sd":$(div).find("span:nth-child(4)").html(),
-			"fyf":$(div).find("#hjd_wordcomment_1").val()
-		}
-
-		var container = pluginPageManager.newWordPanel() 
-		if(!data.word){
-			container = pluginPageManager.nowordpaneltemp();
-
-		}else{
-			// 今、ダータをとったまま、設置します
-			$(container).find("[name='word']").html(data.word);	//单词
-			$(container).find("[name='jm']").html(data.jm);   //日文假名， 沪江词典命名弄反了，这里修正过来
-			$(container).find("[name='roma']").html(data.roma);  //罗马音
-			$(container).find("[name='sd']").html(data.sd);  //　声调 0
-			$(container).find("[name='fyf']").val(data.fyf); //明细隐藏域
-			$(container).find("[name='fyfdetail']").html(data.fyf.split("\n").join("<br>"));
-		}
-
-
-		// change the word img if alreay been saved
-		// var pluginid = chrome.runtime.id;
-		// var imgdel = chrome.extension.getURL('btn_myword_del.gif');
-		// var imgadd = chrome.extension.getURL('btn_myword_add.gif');
-		// var img = $(container).find("#hjd_simple_amw_panel_1 img");
-		// img.attr("src",request.msg.exists == 1 ? imgdel : imgadd);
-		// img.attr("alt", request.msg.exists ? "点击删除" : "添加到生词本");
-		// img.parent().attr("title", request.msg.exists ? "点击删除" : "添加到生词本");
-		// if(request.msg.exists){
-		// 	$(container).find("#hjd_simple_amw_panel_1").append($("<span>").html("已添加"));
-		// 	$(img).attr("exists","1");
-		// }
-		
-
-		$(container).attr("info",JSON.stringify(data));
+		var container = renderQueryResult(request.val)
 		// エレメントのレイアウト設定
 		$(container).css("left",pageX);
 		$(container).css("top",pageY);
 		$(container).append(templates.panelstyletemp);
 		$("html").append($(container));
-
-		initWordStatus(data.word);
 
     }else if(request.key == "savewordresult"){
     		var msg = request.msg;
@@ -165,9 +181,6 @@ function initWordStatus(word){
 	if(!word) return;
 	var json = getCurrentPanelWordInfo();
 
-
-
-
 	DB.syncGet(word).then(function(items) {
 
 		var exists = (word in items) ? 1 : 0
@@ -189,10 +202,6 @@ function initWordStatus(word){
 		}
 
 	});
-
-
-
-
 
 }
 
@@ -224,13 +233,6 @@ $(document).delegate("#hjd_addword_image_1","click",function(){
 		initWordStatus(json.word)
 	});
 
-
-	// chrome.runtime.sendMessage({"key": "saveoraddword", "msg": json});
-	// $(this).find("img").attr("src",imgurl);
-	
-	// var info = $.parseJSON($(this).parents("div").attr("info"));
-	// chrome.runtime.sendMessage({"key": "saveword", "msg": info});
-
 });
 
 
@@ -253,7 +255,6 @@ for (key in changes) {
               storageChange.newValue);
 }
 });
-
 
 
 
@@ -316,26 +317,4 @@ function getSelectionText() {
 
 
 
-// バクグランドとのコミュニケーション対象
-// Background = {}
-// Background.openTab = function(url){
 
-//      chrome.runtime.sendMessage({"key": "openTab", "url": url});
-
-// }
-
-// var relayEvent = function(element, target, eventName, fn){
-
-// 	var targetEl  = document.querySelector(target);
-//   var elementEl = document.querySelector(element);
-  
-// 	elementEl.addEventListener(eventName, function(event){
-//   	if (event.toElement === targetEl){
-//       fn.call(this, event, event.toElement);
-//     }
-//   }, false);
-// };
-
-// relayEvent("#test", "a", "click", function(event, element){
-// 	console.log(event, element);
-// });
