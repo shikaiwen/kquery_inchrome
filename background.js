@@ -9,10 +9,102 @@ var parent = chrome.contextMenus.create({
   }
 });
 
+chrome.contextMenus.create({
+  title: "search %s in dictionary",
+  contexts: ["selection"],
+  onclick: function(info,tab){
+      var text = info.selectionText;
+      toQuery(text);
+  }
+});
+
+
+var chromeInFocus = true;  // global boolean to keep track of state
+chrome.windows.onFocusChanged.addListener(function(window) {
+
+    // alert(window.focused)
+    // if (window == chrome.windows.WINDOW_ID_NONE) {
+    //     chromeInFocus = false;
+    // } else {
+    //     chromeInFocus = true;
+    // }
+});
+
+
+
 
 chrome.commands.onCommand.addListener(function(command) {
-    // console.log('Command:', command);
 
+    chrome.windows.getCurrent(function(browser){
+
+      if(browser.focused){
+        // alert(chromeInFocus)
+          datatube.backend.request_getSelectedText(function(text){
+              toQuery(text);
+          });
+      }else{
+        // alert(chromeInFocus)
+          doGlobalQuery();
+      }
+
+    });
+
+
+
+
+
+  // chrome.tabs.query({
+  //   active: true,
+  //   currentWindow: true
+  // }, function(tabs) {
+  //   if(!tabs[0]){
+  //       alert(JSON.stringify(tabs))
+  //   }else{
+  //   }
+  // });
+
+
+});
+
+function doGlobalQuery(){
+  
+  var clipData = getFromClipBoard();
+  if(!clipData)return;
+
+  doQuery(clipData,function(neededHtml){
+
+    var json = JSON.parse(neededHtml);
+
+    var currPageProtocal = location.href.substr(0,location.href.indexOf("/")+2)
+    var relcnt = json.content.replace("http://",currPageProtocal);
+    var div = $("<div>");
+    $(div).html(relcnt);
+
+    // word(单词) jm(英文假名) roma(罗马假名) sd(声调) fyf(说明内容，用换行符号分割)
+    var data = {
+      "word": $(div).find("span.hjd_Green > font").html(),
+      "roma":$(div).find("span:nth-child(2)").html(),
+      "jm":$(div).find("span:nth-child(3)").html(),
+      "sd":$(div).find("span:nth-child(4)").html(),
+      "fyf":$(div).find("#hjd_wordcomment_1").val()
+    }
+    var arr = [data.word +";" + data.jm + " "+data.sd, data.fyf];
+    if(data.word){
+      alert(arr.join("\n"));  
+    }else{
+      alert("未查询到单词:" + clipData); 
+    }
+
+    
+  });
+
+
+  
+
+}
+
+function getFromClipBoard(){
+  // alert( chrome.extension.getBackgroundPage())
   bg = chrome.extension.getBackgroundPage();        // get the background page
   bg.document.body.innerHTML= "";                   // clear the background page
 
@@ -33,20 +125,31 @@ chrome.commands.onCommand.addListener(function(command) {
 
   // read the clipboard contents from the helperdiv
   var clipboardContents = helperdiv.innerHTML;
-    getTextDesendent($(clipboardContents))
-    alert(clipboardWant)
-    alert("length:" +clipboardContents.length +"\n"+clipboardContents)
-    datatube.backend.request_getSelectedText(function(text){
-        toQuery(text);
-    })
-});
 
+  // clipboardWant = clipboardContents;
+  // return;
 
+  var isHtmlData = true;
+
+  if(clipboardContents.indexOf("table>")!= -1 
+   || clipboardContents.indexOf("td>") != -1
+   || clipboardContents.indexOf("font>") != -1
+   || clipboardContents.indexOf("span>") != -1
+   ){
+    // getTextDesendent($(clipboardContents))
+    return $(clipboardContents).text().trim();
+  }else{
+    return clipboardContents;
+  }
+
+  // datatube.backend.request_getSelectedText(function(text){
+  //     toQuery(text);
+  // });
+}
 
 var clipboardWant = "";
 function getTextDesendent(elt){
-
-  var want = ""
+  
   var children = $(elt).contents()
   for(var v=0; v<children.length; v++){
     var item = children[v]
@@ -59,8 +162,6 @@ function getTextDesendent(elt){
       getTextDesendent(item);
     }
   }
-
-  return want 
 }
 
 
@@ -70,14 +171,7 @@ var getTextNodesIn = function(el) {
     });
 };
 
-chrome.contextMenus.create({
-	title: "search %s in dictionary",
-	contexts: ["selection"],
-	onclick: function(info,tab){
-      var text = info.selectionText;
-      toQuery(text);
-  }
-});
+
 
 
 
@@ -115,11 +209,6 @@ function doQuery(word, callback){
           neededHtml = neededHtml.replace(""+replaceArr[i], "\"" + replaceArr[i] + "\"")
         }
 
-
-
-
-
-        
         callback(neededHtml);
 
     });

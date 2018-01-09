@@ -1,4 +1,7 @@
-function getSelectSentence(){
+
+var Selection = {}
+
+Selection.getSelectSentence = function (){
 	
 	var selection = document.getSelection();
 

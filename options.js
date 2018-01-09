@@ -15,8 +15,10 @@ function initData(items){
 		var tr = $("#trTemplate").clone().attr("id","").show()
 		$(tr).find(":nth-child(1)").html(++cnt)
 		$(tr).find(":nth-child(2)").html(key)
-		$(tr).find(":nth-child(3)").html(items[key]["roma"] +" "+ items[key]["sd"])
-		$(tr).find(":nth-child(4)").html(items[key].fyf)
+		$(tr).find(":nth-child(3)").html(items[key]["jm"] +" "+ items[key]["sd"])
+
+		var td4 = items[key].fyf + "<br>" + "context:"+(items[key].context ? items[key].context: "");
+		$(tr).find(":nth-child(4)").html(td4)
 
 		$("#content tbody").append(tr)
 		// $("<tr>").append($("<td>").html(key))

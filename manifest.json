@@ -1,8 +1,15 @@
 {
   "manifest_version": 2,
-  "name": "wordmem",
-  "description": "words remembering tool",
-  "version": "1.0",
+  "name": "happy query",
+  "description": "words query and remembering tool",
+  "version": "1.5",
+  "icons": { "16": "icon16.png",
+           "32": "icon32.png",
+           "64": "icon64.png",
+          "128": "icon128.png",
+          "256": "icon256.png",
+          "512": "icon512.png"
+        },
   "background":{
       "css": ["plugin.css"],
       "scripts":["background.js","jquery-1.12.4.js","datatube.js","jquery-ui/jquery-ui.js","storage.js"]
@@ -16,7 +23,8 @@
         "jquery.formhelper.js",
         "content.js",
         "datatube.js",
-        "storage.js"
+        "storage.js",
+        "selection.js"
     ]
   }
   ],
@@ -30,8 +38,6 @@
     "storage",
     "clipboardRead",
     "clipboardWrite"
-    // "http://*/",
-    // "https://*/"
   ],
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "options_page": "options.html",

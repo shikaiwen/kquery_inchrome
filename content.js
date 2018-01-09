@@ -64,7 +64,7 @@ pluginPageManager.getTopPanel = function(){
 function showQueryPanel(){
 
 	if($("#querypanel").length >0)return;
-	$(document).delegate("#querypanel img", "click", function(){
+	$(document).delegate("#querypanel #closeIcon img", "click", function(){
 		$("#querypanel").remove();
 	});
 
@@ -80,12 +80,25 @@ function showQueryPanel(){
 // 点击查询按钮
 $(document).delegate("#querypanel [type='button']", "click",function(){
 	var word = $(this).siblings("input").val();
+	queryPanelQuery(word);
+});
+$(document).delegate("#querypanel [type='input']", "keydown",function(e){
+	if(e.keyCode == 13){
+		var word = $(this).val();	
+		queryPanelQuery(word);
+	}
+
+});
+
+function queryPanelQuery(word){
 	datatube.front.request_queryWord(word,function(request){
 		var container = renderQueryResult(request)
 		$(container).removeClass("wordmempanel")
 		$("#querypanel #queryResultCnt").html(container);
 	});
-})
+}
+
+
 
 function renderQueryResult(request){
 
@@ -196,9 +209,9 @@ function initWordStatus(word){
 		img.attr("alt", exists ? "点击删除" : "添加到生词本");
 		img.parent().attr("title", exists ? "点击删除" : "添加到生词本");
 
+		$(img).attr("exists", exists);
 		if (exists) {
-			$(container).find("#hjd_simple_amw_panel_1").append($("<span>").html("已添加"));
-			$(img).attr("exists", "1");
+			// $(container).find("#hjd_simple_amw_panel_1").append($("<span>").html("已添加"));
 		}
 
 	});
@@ -207,7 +220,8 @@ function initWordStatus(word){
 
 
 
-$(document).delegate("#hjd_addword_image_1","click",function(){
+//添加生词本
+$(document).delegate("#hjd_addword_image_1 img","click",function(){
 
 
 	var pluginid = chrome.runtime.id;
@@ -217,21 +231,35 @@ $(document).delegate("#hjd_addword_image_1","click",function(){
 	var exists = $(this).attr("exists")
 
 	var json = getCurrentPanelWordInfo(this);
-	
+	json["context"] = Selection.getSelectSentence();
 	var data = {
 		"word":json.word ,
 		"exists":exists
 	}
-	var wordkey = json["word"];
-	var timestamp = new Date().getTime();
 
-	var syndata = {}
-	var wordkey = json.word;
-	syndata[wordkey] = json;
+	if(exists == 1){
 
-	DB.syncSet(syndata).then(function(result){
-		initWordStatus(json.word)
-	});
+		chrome.storage.sync.remove(json.word, function(items) {
+			initWordStatus(json.word);
+		});
+
+
+
+	}else{
+
+		var wordkey = json["word"];
+		var timestamp = new Date().getTime();
+		json.timestamp = timestamp;
+		var syndata = {}
+		var wordkey = json.word;
+		syndata[wordkey] = json;
+
+		DB.syncSet(syndata).then(function(result){
+			initWordStatus(json.word);
+		});
+	}
+
+
 
 });
 
