@@ -71,10 +71,18 @@ function showQueryPanel(){
 	var panel = pluginPageManager.newQueryPanel()
 	$(panel).css("left",pageX);
 	$(panel).css("top",pageY);
-	$(panel).append(templates.panelstyletemp);
+	// $(panel).append(templates.panelstyletemp);
 	
 	$("#closeIcon img").attr("src", chrome.extension.getURL('cancel.png'));
 	$("html").append($(panel));
+
+	// $(panel).draggable();
+	var draggableDiv = $('.querypanel');
+	draggableDiv.draggable({
+	  handle: $('.qptitlebar', draggableDiv)
+	});
+
+
 }
 
 // 点击查询按钮
@@ -89,6 +97,17 @@ $(document).delegate("#querypanel [type='input']", "keydown",function(e){
 	}
 
 });
+
+$(document).delegate(".contextLink", "click",function(e){
+		var textarea = $(this).siblings("textarea") 
+		var visible = textarea.is(":visible")
+		if(visible){
+			$(textarea).hide();
+		}else{
+			$(textarea).show();
+		}
+});
+
 
 function queryPanelQuery(word){
 	datatube.front.request_queryWord(word,function(request){
@@ -112,7 +131,7 @@ function renderQueryResult(request){
 
 	$(div).html(relcnt);
 
-	// word(单词) jm(英文假名) roma(罗马假名) sd(声调) fyf(说明内容，用换行符号分割)
+	// word(单词) jm(英文假名) roma(日语读音) sd(声调) fyf(说明内容，用换行符号分割)
 	var data = {
 		"word": $(div).find("span.hjd_Green > font").html(),
 		"roma":$(div).find("span:nth-child(2)").html(),
@@ -133,12 +152,14 @@ function renderQueryResult(request){
 		$(container).find("[name='sd']").html(data.sd);  //　声调 0
 		$(container).find("[name='fyf']").val(data.fyf); //明细隐藏域
 		$(container).find("[name='fyfdetail']").html(data.fyf.split("\n").join("<br>"));
+
+
 	}
-
-
 
 	$(container).attr("info",JSON.stringify(data));
 
+
+	
 
 	initWordStatus(data.word);
 	return container;
@@ -148,14 +169,23 @@ function renderQueryResult(request){
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
   	
-    
     if(request.key == "queryresult"){
 
 		var container = renderQueryResult(request.val)
 		// エレメントのレイアウト設定
 		$(container).css("left",pageX);
 		$(container).css("top",pageY);
-		$(container).append(templates.panelstyletemp);
+
+		DB.exist(data["word"],function(exist,data){
+			
+			if(exist){
+				$(container).find("textarea").val(data["context"]);
+			}else{
+				var context = Selection.getSelectSentence().trim();
+				$(container).find("textarea").val(data["context"]);
+			}
+		});
+
 		$("html").append($(container));
 
     }else if(request.key == "savewordresult"){
@@ -210,6 +240,7 @@ function initWordStatus(word){
 		img.parent().attr("title", exists ? "点击删除" : "添加到生词本");
 
 		$(img).attr("exists", exists);
+
 		if (exists) {
 			// $(container).find("#hjd_simple_amw_panel_1").append($("<span>").html("已添加"));
 		}
@@ -223,7 +254,6 @@ function initWordStatus(word){
 //添加生词本
 $(document).delegate("#hjd_addword_image_1 img","click",function(){
 
-
 	var pluginid = chrome.runtime.id;
 
 	var imgurl = chrome.extension.getURL('btn_myword_del.gif');
@@ -231,19 +261,19 @@ $(document).delegate("#hjd_addword_image_1 img","click",function(){
 	var exists = $(this).attr("exists")
 
 	var json = getCurrentPanelWordInfo(this);
-	json["context"] = Selection.getSelectSentence();
+
+	var context = $(this).parents(".wordmempanel").find("textarea").val()
+	json["context"] = context;
+
 	var data = {
-		"word":json.word ,
+		"word":json.word,
 		"exists":exists
 	}
 
 	if(exists == 1){
-
 		chrome.storage.sync.remove(json.word, function(items) {
 			initWordStatus(json.word);
 		});
-
-
 
 	}else{
 
@@ -302,6 +332,9 @@ $(document).on("click",function(e){
 
 	var panel = pluginPageManager.getTopPanel();
 	if(!panel) return;
+
+	//もし、父はquerypanel、閉じない
+	if($(panel).parents("#querypanel").length>0) return;
 
 	var ex = e.clientX;
 	var ey = e.clientY;

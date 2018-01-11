@@ -28,8 +28,15 @@ DB.syncGet = function(word){
 }
 
 DB.get = function(data, callback) {
-
 	chrome.storage.sync.get(data, function(items) {
 		callback(items);
+	});
+}
+
+DB.exist = function(word,callback){
+	chrome.storage.sync.get(word, function(items) {
+		var exists = (word in items) ? 1 : 0
+
+		callback(exists,items[word]);
 	});
 }

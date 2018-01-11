@@ -274,6 +274,15 @@ function sendToActiveTab(data) {
 
 }
 
+
+function unicodeToChar(text) {
+   return text.replace(/\\u[\dA-F]{4}/gi, 
+          function (match) {
+               return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16));
+          });
+}
+
+
 // HJ.fun.jsonCallBack({content:"<span class='hjd_Green' title='\u65E5\u8BED\u5355\u8BCD'>[<font color=red>\u756A\u53F7</font>]</span> <span title='\u5047\u540D'>[banngou]</span> <span class='hjd_Orange' title='\u7F57\u9A6C\u97F3'>[\u3070\u3093\u3054\u3046]</span> <span title=\"\u58F0\u8C03\" class=\"hjd_Orange\">\u2462</span><span title=\"\u65E5\u8BED\u53D1\u97F3\"></span><span id=\"hjd_simple_amw_panel_1\" class=\"hjd_add_myword\"><a id='hjd_addword_image_1' href='###' class='hjd_simple_addword_image' onclick = 'HJ.fun.AddSimpleJpWord(1);return false' title = '\u6DFB\u52A0\u5230\u6211\u7684\u751F\u8BCD\u672C'><img align='absmiddle' src ='http://dict.hjenglish.com/images/btn_myword_add.gif' alt='\u6DFB\u52A0\u5230\u6211\u7684\u751F\u8BCD\u672C' width='16' height='16' /></a></span><br/><input type=\"hidden\" value=\"\u756A\u53F7\" id=\"hjd_amw_word_1\"/><input type=\"hidden\" value=\"\u3010\u540D\u8BCD\u3011 \r\n\u53F7\u7801\uFF0C\u53F7\u6570\uFF0C\u53F7\u5934\u3002\r\n\r\n\" id =\"hjd_wordcomment_1\"/><b>\u3010\u540D\u8BCD\u3011</b> <br/>\u53F7\u7801\uFF0C\u53F7\u6570\uFF0C\u53F7\u5934\u3002<br/><br/>",IfHasScb:"False",hjd_langs:"jc",WordId:"0",FromLang:"Jp",ToLang:"Cn"});HJ.fun.changeLanguage('jc');
 
 // HJ.fun.jsonCallBack({
