@@ -153,11 +153,8 @@ function renderQueryResult(request){
 		$(container).find("[name='fyf']").val(data.fyf); //明细隐藏域
 		$(container).find("[name='fyfdetail']").html(data.fyf.split("\n").join("<br>"));
 
-
+		$(container).attr("info",JSON.stringify(data));
 	}
-
-	$(container).attr("info",JSON.stringify(data));
-
 
 	
 
@@ -175,18 +172,23 @@ chrome.runtime.onMessage.addListener(
 		// エレメントのレイアウト設定
 		$(container).css("left",pageX);
 		$(container).css("top",pageY);
+		$("html").append($(container));
 
-		DB.exist(data["word"],function(exist,data){
+		if(!$(container).attr("info")) return;
+
+		var info = $.parseJSON($(container).attr("info"))
+
+		DB.exist(info["word"],function(exist,data){
 			
-			if(exist){
+			if(exist && data.context){
 				$(container).find("textarea").val(data["context"]);
 			}else{
 				var context = Selection.getSelectSentence().trim();
-				$(container).find("textarea").val(data["context"]);
+				$(container).find("textarea").val(context);
 			}
 		});
 
-		$("html").append($(container));
+		
 
     }else if(request.key == "savewordresult"){
     		var msg = request.msg;
@@ -327,6 +329,11 @@ function getCurrentPanelWordInfo(eltInPanel){
 	return infojson;
 }
 
+$(document).delegate(".panelLock", "click", function(){
+	var locked = $(this).attr("locked");
+	$(this).attr("locked", locked == "1" ? "0":"1");
+	$(this).text(locked == "1" ? "Lock":"Unlock");
+});
 
 $(document).on("click",function(e){
 
@@ -335,6 +342,11 @@ $(document).on("click",function(e){
 
 	//もし、父はquerypanel、閉じない
 	if($(panel).parents("#querypanel").length>0) return;
+
+	if($(panel).find(".panelLock").attr("locked") == "1"){
+		return;
+	}
+	
 
 	var ex = e.clientX;
 	var ey = e.clientY;

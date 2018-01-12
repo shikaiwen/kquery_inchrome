@@ -5,3 +5,7 @@ v1.5.2
 		  (b) 需要增加context编辑功能
 		  (c) 查出数据时如果单词本中已经有了，将之前保存的context也显示出来
 	completed-time:1515637938584
+v1.5.2.1
+	bugfix
+v1.5.2.1 panel lock bugfix
+		 time:1515721964255
