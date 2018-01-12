@@ -330,9 +330,30 @@ function getCurrentPanelWordInfo(eltInPanel){
 }
 
 $(document).delegate(".panelLock", "click", function(){
+
+
 	var locked = $(this).attr("locked");
 	$(this).attr("locked", locked == "1" ? "0":"1");
 	$(this).text(locked == "1" ? "Lock":"Unlock");
+
+	if($(this).parents("#querypanel").length == 0 ) {
+
+		var draggableDiv = $(this).parents(".wordmempanel")
+
+		if($(this).attr("locked") == "1"){
+			draggableDiv.draggable({
+			  handle: $('.wordpaneltitlebar', draggableDiv)
+			});
+			$(draggableDiv).find(".wordpaneltitlebar").css("cursor","move");
+			draggableDiv.draggable("enable")
+		}else{
+			$(draggableDiv).find(".wordpaneltitlebar").css("cursor","");
+			draggableDiv.draggable("disable")
+		}
+
+		
+	}
+
 });
 
 $(document).on("click",function(e){

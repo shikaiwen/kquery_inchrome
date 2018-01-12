@@ -19,6 +19,11 @@
     border-radius: 10px;
     left: 29px;
     top: 32px;
+    padding-top: 0px;
+}
+
+.wordmempanel .wordpaneltitlebar{
+    padding-top: 10px;
 }
 
 .clearfix:after{
