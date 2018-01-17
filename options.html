@@ -39,50 +39,91 @@
     	margin: 10 26px;
 	}
 </style>
+
+
 <link rel="stylesheet" href="./jquery-ui/jquery-ui.css">
 <link rel="stylesheet" href="./bootstrap4/css/bootstrap.css">
+<link rel="stylesheet" href="./datatables/res/css/dataTables.bootstrap4.css">
+<link rel="stylesheet" href="./plugin.css">
 
 <script type="text/javascript" src="./jquery-1.12.4.js"></script>
 <script type="text/javascript" src="./jquery-ui/jquery-ui.js"></script>
+<!-- <script type="text/javascript" src="./bootstrap.bundle.js"></script> -->
+<script type="text/javascript" src="./proper.js"></script>
+<script type="text/javascript" src="./bootstrap.js"></script>
+
 <script type="text/javascript" src="./storage.js"></script>
 <script type="text/javascript" src="./options.js"></script>
 <script type="text/javascript" src="./papaparse.js"></script>
-<script type="javascript" src="./bootstrap4/js/bootstrap.js"></script>
+
+<script type="text/javascript" src="./content.js"></script>
+<script type="text/javascript" src="./selection.js"></script>
+ <script type="text/javascript" src="./datatube.js"></script>
+
+<script type="text/javascript" src="./datatables/res/js/jquery.dataTables.js"></script>
+<script type="text/javascript" src="./datatables/res/js/dataTables.bootstrap4.js"></script>
 
 
-<div id="panel">
-	<button type="button" id="export" class="btn btn-success">ExportAsCSV</button>
-</div>
+<div class="container">
 	
-	<div>
+		<div id="panel" class="row">
+			<button type="button" id="export" class="btn btn-success" data-toggle="modal" data-target="#expModal" >ExportAsCSV</button>
+			<button type="button" id="showExportBtn" class="btn btn-primary" data-toggle="modal" data-target="#myModal">ExportHistory</button>
+		</div>
+	
+	<table class="table table-striped" id="content2"></table>
 
-<table  >
 
-</table>
+	<div  id="expModal" class="modal fade"tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-lg" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="exampleModalLabel">ExportData</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	        
+				<form class="form-inline">
+				  <input type="text" class="form-control mb-2 mr-sm-2 mb-sm-0" id="startTimeInput" placeholder="开始时间戳">
+				  <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+				    <input type="text" class="form-control" id="endTimeInput" placeholder="结束时间戳">
+				  </div>
 
-
-
-
-<table class="table table-striped" id="content">
-  <thead class="thead-dark">
-    <tr>
-      <th scope="col" >No</th>
-      <th scope="col" >単語</th>
-      <th scope="col" >発音</th>
-      <th scope="col" >詳細説明</th>
-    </tr>
-  </thead>
-  <tbody>
-	<tr id="trTemplate" style="display: none;">
-	  <th scope="row"></th>
-	  <td>2</td>
-	  <td>Jacob</td>
-	  <td>Thornton</td>
-	</tr>
-  </tbody>
-</table>
-
+				  <div class="form-check mb-2 mr-sm-2 mb-sm-0">
+				    <label class="form-check-label">
+				      <input class="form-check-input" type="checkbox" id="saveExpCheckbox">保存导出历史
+				    </label>
+				  </div>
+				  <button type="button" class="btn btn-primary" id="exportCsvBtn">ExportToConsole</button>
+				</form>
+	      </div>
+	    </div>
+	  </div>
 	</div>
+
+	<!-- Modal -->
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-lg" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	        
+			<table id="example" class="display" width="100%"></table>
+
+	      </div>
+	    </div>
+	  </div>
+	</div>
+
+
+</div>
 
 	</body>
 </html>

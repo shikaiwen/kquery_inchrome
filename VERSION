@@ -1,12 +1,20 @@
 
 v1.5.1
 v1.5.2 
-	TODO: (a) query panel 成为draggble后无法选择数据，应该做成只有title才是draggble
-		  (b) 需要增加context编辑功能
-		  (c) 查出数据时如果单词本中已经有了，将之前保存的context也显示出来
-	completed-time:1515637938584
-v1.5.2.1
-	bugfix
-v1.5.2.2 panel lock bugfix
-		 time:1515721964255
- v1.5.2.3 wordpanel locked draggble
+		TODO: (a) query panel 成为draggble后无法选择数据，应该做成只有title才是draggble
+			  (b) 需要增加context编辑功能
+			  (c) 查出数据时如果单词本中已经有了，将之前保存的context也显示出来
+		completed-time:1515637938584
+	v1.5.2.1
+		bugfix
+	v1.5.2.2 panel lock bugfix
+			 time:1515721964255
+	v1.5.2.3 wordpanel locked draggble
+v1.5.3
+	v1.5.3.0 (a)将content.JS添加到background中，让options页面也能showquerypanel
+			 (b)querypanel position改成fixed，滚动页面也不消失
+			 (c)添加导出历史功能
+			 
+TODO　需要完善，查询单词有多个内容时，只显示了第一个，如这个词 稲
+
+

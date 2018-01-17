@@ -69,8 +69,11 @@ function showQueryPanel(){
 	});
 
 	var panel = pluginPageManager.newQueryPanel()
+
 	$(panel).css("left",pageX);
-	$(panel).css("top",pageY);
+	$(panel).css("top",clientY);
+
+
 	// $(panel).append(templates.panelstyletemp);
 	
 	$("#closeIcon img").attr("src", chrome.extension.getURL('cancel.png'));
@@ -86,10 +89,11 @@ function showQueryPanel(){
 }
 
 // 点击查询按钮
-$(document).delegate("#querypanel [type='button']", "click",function(){
+$(document).delegate("#querypanel #queryBtn", "click",function(){
 	var word = $(this).siblings("input").val();
 	queryPanelQuery(word);
 });
+
 $(document).delegate("#querypanel [type='input']", "keydown",function(e){
 	if(e.keyCode == 13){
 		var word = $(this).val();	
@@ -188,15 +192,14 @@ chrome.runtime.onMessage.addListener(
 			}
 		});
 
-		
-
     }else if(request.key == "savewordresult"){
-    		var msg = request.msg;
-    		if(msg.code == 1){
+    	var msg = request.msg;
+    	if(msg.code == 1){
+    	}
+    }else if(request.key == "showQueryPanel"){
 
-    		}
-    }
-
+		showQueryPanel()
+	}
 
   }
 );

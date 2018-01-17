@@ -42,10 +42,8 @@
     padding-bottom: 30px;
     z-index: 2147483647;
     min-height: 180px;
-    position: absolute;
+    position: fixed;
     /*border: red solid 1.5px;*/
-    left: 29px;
-    top: 32px;
 }
 
 .querypanel .qptitlebar{

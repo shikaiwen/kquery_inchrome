@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "happy query",
   "description": "words query and remembering tool",
-  "version": "1.5.2.3",
+  "version": "1.5.3.0",
   "icons": { "16": "icon16.png",
            "32": "icon32.png",
            "64": "icon64.png",
@@ -12,7 +12,15 @@
         },
   "background":{
       "css": ["plugin.css"],
-      "scripts":["background.js","jquery-1.12.4.js","datatube.js","jquery-ui/jquery-ui.js","storage.js"]
+      "scripts":[
+        "background.js",
+        "jquery-1.12.4.js",
+        "datatube.js",
+        "jquery-ui/jquery-ui.js",
+        "storage.js",
+        "bootstrap4/js/bootstrap.js",
+        "datatables/datatables.js"
+      ]
   },
   "content_scripts":[
     {
