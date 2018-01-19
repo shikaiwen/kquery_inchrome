@@ -14,17 +14,12 @@ $(document).ready(function(){
                 templatesCnt.each(function(){
                     templates[this.id] = this.innerHTML;
                 });
-
-                // return resolve(templates);
             }
         });
 
 });
 
-
-
 localres = {
-
 	"btn_myword_del":chrome.extension.getURL('btn_myword_del.gif'),
 	"btn_myword_add":chrome.extension.getURL('btn_myword_add.gif'),
 }
@@ -77,6 +72,7 @@ function showQueryPanel(){
 	// $(panel).append(templates.panelstyletemp);
 	
 	$("#closeIcon img").attr("src", chrome.extension.getURL('cancel.png'));
+	$(panel).find("[name='qword']").focus();
 	$("html").append($(panel));
 
 	// $(panel).draggable();
@@ -118,6 +114,23 @@ function queryPanelQuery(word){
 		var container = renderQueryResult(request)
 		$(container).removeClass("wordmempanel")
 		$("#querypanel #queryResultCnt").html(container);
+
+
+		if(!$(container).attr("info")) return;
+
+		var info = $.parseJSON($(container).attr("info"))
+
+		DB.exist(info["word"],function(exist,data){
+			
+			if(exist && data.context){
+				$(container).find("textarea").val(data["context"]);
+			}else{
+				var context = Selection.getSelectSentence().trim();
+				$(container).find("textarea").val(context);
+			}
+		});
+
+
 	});
 }
 
@@ -388,8 +401,6 @@ $(document).on("click",function(e){
 	initWordStatus()
 
 });
-
-
 
 
 document.onmouseup = document.onkeyup = document.onselectionchange = function() {

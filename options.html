@@ -6,33 +6,7 @@
 </head>
 <body>
 <style type="text/css">
-/*	#panel {
-	    width: 304px;
-	    height: 222px;
-	    position: absolute;
-	    border: red solid 1.5px;
-	    left: 29px;
-	    top: 32px;
-	}*/
 
-/*	table{
-		display: flex;
-		justify-content: center;
-	}
-
-	table tr{
-		display: flex;
-		justify-content: space-between;
-	}
-
-	table tr td:nth-child(3){
-		max-width: 400px;
-	}*/
-
-	table {
-    /*table-layout: fixed;*/
-    /*word-wrap: break-word;*/
-	}
 
 	#panel button{
 		float: right;
@@ -48,20 +22,19 @@
 
 <script type="text/javascript" src="./jquery-1.12.4.js"></script>
 <script type="text/javascript" src="./jquery-ui/jquery-ui.js"></script>
-<!-- <script type="text/javascript" src="./bootstrap.bundle.js"></script> -->
 <script type="text/javascript" src="./proper.js"></script>
 <script type="text/javascript" src="./bootstrap.js"></script>
+<script type="text/javascript" src="./datatables/res/js/jquery.dataTables.js"></script>
+<script type="text/javascript" src="./datatables/res/js/dataTables.bootstrap4.js"></script>
+
 
 <script type="text/javascript" src="./storage.js"></script>
 <script type="text/javascript" src="./options.js"></script>
 <script type="text/javascript" src="./papaparse.js"></script>
-
 <script type="text/javascript" src="./content.js"></script>
 <script type="text/javascript" src="./selection.js"></script>
- <script type="text/javascript" src="./datatube.js"></script>
+<script type="text/javascript" src="./datatube.js"></script>
 
-<script type="text/javascript" src="./datatables/res/js/jquery.dataTables.js"></script>
-<script type="text/javascript" src="./datatables/res/js/dataTables.bootstrap4.js"></script>
 
 
 <div class="container">
@@ -98,7 +71,6 @@
 				  </div>
 				  <button type="button" class="btn btn-primary" id="exportCsvBtn">ExportToConsole</button>
 				</form>
-	      </div>
 	    </div>
 	  </div>
 	</div>
@@ -107,6 +79,7 @@
 	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 	  <div class="modal-dialog modal-lg" role="document">
 	    <div class="modal-content">
+
 	      <div class="modal-header">
 	        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
 	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
