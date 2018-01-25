@@ -100,18 +100,27 @@ function doPageListRender(items,sortedKeyArr){
 	var sortedArr = new Array(items.length);
 
 	var cnt = 0;
-
 	var datacnt = []
 
 	for(var i = sortedKeyArr.length-1 ; i>=0; i--){
-
 		var wordKey = sortedKeyArr[i];
-		var arr = [i,
-		wordKey,
-		items[wordKey]["jm"] +" "+ items[wordKey]["sd"], 
-		items[wordKey].fyf + "<br>" + "context:"+(items[wordKey].context ? items[wordKey].context: ""),
-		new Date(items[wordKey].timestamp).toLocaleString()
-		]
+		var wordJson = items[wordKey];
+		var detailInfo = items[wordKey].fyf + "<br>" + "context:"+(wordJson.context ? wordJson.context: "");
+		if(wordJson.linkwordsinfo && wordJson.linkwordsinfo.length>0){
+			detailInfo += "<br>";
+			detailInfo += "关联词语:";
+			detailInfo += wordJson.linkwordsinfo.reduce(function(a,v){
+				a += "<br>" + JSON.stringify(v);
+				return a;
+			},"");
+		}
+		var arr = [
+			i,
+			wordKey,
+			wordJson.jm +" "+ wordJson.sd,
+			detailInfo,
+			new Date(items[wordKey].timestamp).toLocaleString()
+		];
 		datacnt.push(arr);
 	}
 
@@ -125,23 +134,6 @@ function doPageListRender(items,sortedKeyArr){
 	            { title: "登録時間" }
 	        ]
 	    } );
-	// for(var i = sortedKeyArr.length-1 ; i>=0; i--){
-
-	// 	var wordKey = sortedKeyArr[i];
-	// 	var tr = $("#trTemplate").clone().attr("id","").show()
-	// 	$(tr).find(":nth-child(1)").html(++cnt)
-	// 	$(tr).find(":nth-child(2)").html(wordKey)
-	// 	$(tr).find(":nth-child(3)").html(items[wordKey]["jm"] +" "+ items[wordKey]["sd"]);
-
-	// 	var td4 = items[wordKey].fyf + "<br>" + "context:"+(items[wordKey].context ? items[wordKey].context: "");
-	// 	$(tr).find(":nth-child(4)").html(td4);
-		
-	// 	var d = new Date();
-	// 	d.setTime(items[wordKey].timestamp)
-	// 	$(tr).find(":nth-child(5)").html(d.toLocaleString());
-	// 	$("#content tbody").append(tr)
-
-	// }
 
 }
 
@@ -160,10 +152,21 @@ function doPageListRender2(items,sortedKeyArr){
 
 
 	for(var i = 0 ; i < 20; i++){
-		datacnt.push([i, wordKey,
-		items[wordKey]["jm"] +" "+ items[wordKey]["sd"], 
-		items[wordKey].fyf + "<br>" + "context:"+(items[wordKey].context ? items[wordKey].context: ""),
-		(function(){var dt = new Date();dt.setTime(d.getTime()+ i*1000);return dt.toLocaleString()})()   ])
+
+		var detail = items[wordKey].reduce(function(a,v,i){
+			a += v.fyf + "<br/>";
+			return a;
+		},"");
+		var context = "context:"+(items[wordKey].context ? items[wordKey].context: "");
+
+		items[wordKey].fyf + "<br>" + "context:"+(items[wordKey][0].context ? items[wordKey].context: "")
+		datacnt.push([
+			i,
+		 	wordKey,
+			items[wordKey][0]["jm"] +" "+ items[wordKey][0]["sd"], 
+			detail + "<br>" + context,
+		(function(){var dt = new Date();dt.setTime(d.getTime()+ i*1000);return dt.toLocaleString()})()   ]
+		)
 	}
 
     $('#content2').DataTable( {
@@ -180,15 +183,6 @@ function doPageListRender2(items,sortedKeyArr){
 
 
 
-$(function(){
-
-	// $("#export").click(function(){
-	// 	DB.get(null,function(items){
-	// 		console.log(toCsv(items))
-	// 	});
-	// });
-
-})
 
 
 
@@ -304,38 +298,21 @@ $(document).ready(function() {
 	});
 
 
-	historyDataTable = $('#example').DataTable({
-    data: dataSet2,
-    search:false,
-    columns:    (function(){
-    				var order = ["dotime", "recordsCnt", "starttime","expendtime"];
-    				var colArr = [];
-					$.map(order, function(col){
-						colArr.push({title:col});
-					});
-					return colArr;
-    	})()
+	// historyDataTable = $('#example').DataTable({
+ //    data: dataSet2,
+ //    search:false,
+ //    columns:    (function(){
+ //    				var order = ["dotime", "recordsCnt", "starttime","expendtime"];
+ //    				var colArr = [];
+	// 				$.map(order, function(col){
+	// 					colArr.push({title:col});
+	// 				});
+	// 				return colArr;
+ //    	})()
 
-	});
+	// });
 
 } );
 
 
 
-
-var dataSet2 = [
-    [ "Tiger Nixon", "System Architect", "Edinburgh", "5421", "2011/04/25", "$320,800" ],
-    [ "Garrett Winters", "Accountant", "Tokyo", "8422", "2011/07/25", "$170,750" ],
-    [ "Ashton Cox", "Junior Technical Author", "San Francisco", "1562", "2009/01/12", "$86,000" ],
-    [ "Cedric Kelly", "Senior Javascript Developer", "Edinburgh", "6224", "2012/03/29", "$433,060" ],
-    [ "Airi Satou", "Accountant", "Tokyo", "5407", "2008/11/28", "$162,700" ],
-    [ "Brielle Williamson", "Integration Specialist", "New York", "4804", "2012/12/02", "$372,000" ],
-    [ "Herrod Chandler", "Sales Assistant", "San Francisco", "9608", "2012/08/06", "$137,500" ],
-    [ "Rhona Davidson", "Integration Specialist", "Tokyo", "6200", "2010/10/14", "$327,900" ],
-    [ "Colleen Hurst", "Javascript Developer", "San Francisco", "2360", "2009/09/15", "$205,500" ],
-    [ "Sonya Frost", "Software Engineer", "Edinburgh", "1667", "2008/12/13", "$103,600" ],
-    [ "Jena Gaines", "Office Manager", "London", "3814", "2008/12/19", "$90,560" ],
-    [ "Quinn Flynn", "Support Lead", "Edinburgh", "9497", "2013/03/03", "$342,000" ],
-    [ "Charde Marshall", "Regional Director", "San Francisco", "6741", "2008/10/16", "$470,600" ]
-
-];

@@ -136,48 +136,30 @@ function queryPanelQuery(word){
 
 
 
-function renderQueryResult(request){
-
-	var div =  $("<div>");
-
-	var json = JSON.parse(request);
-
-	var currPageProtocal = location.href.substr(0,location.href.indexOf("/")+2)
-	var relcnt = json.content.replace("http://",currPageProtocal);
+function renderQueryResult(dataArr){
 
 
-	$(div).html(relcnt);
-
-	// word(单词) jm(英文假名) roma(日语读音) sd(声调) fyf(说明内容，用换行符号分割)
-	var data = {
-		"word": $(div).find("span.hjd_Green > font").html(),
-		"roma":$(div).find("span:nth-child(2)").html(),
-		"jm":$(div).find("span:nth-child(3)").html(),
-		"sd":$(div).find("span:nth-child(4)").html(),
-		"fyf":$(div).find("#hjd_wordcomment_1").val()
-	}
-
-	var container = pluginPageManager.newWordPanel() 
-	if(!data.word){
+	if(dataArr.length == 0){
 		container = pluginPageManager.nowordpaneltemp();
-
 	}else{
+		var container = pluginPageManager.newWordPanel() 
 		// 今、ダータをとったまま、設置します
-		$(container).find("[name='word']").html(data.word);	//单词
-		$(container).find("[name='jm']").html(data.jm);   //日文假名， 沪江词典命名弄反了，这里修正过来
-		$(container).find("[name='roma']").html(data.roma);  //罗马音
-		$(container).find("[name='sd']").html(data.sd);  //　声调 0
-		$(container).find("[name='fyf']").val(data.fyf); //明细隐藏域
-		$(container).find("[name='fyfdetail']").html(data.fyf.split("\n").join("<br>"));
+		dataArr.forEach(function(data,i){
+			var wordtmp = $(container).find("#wordmempanel_word_tmp").clone().attr("id","").show();
+			$(wordtmp).find("[name='word']").html(data.word);	//单词
+			$(wordtmp).find("[name='jm']").html(data.jm);   //日文假名， 沪江词典命名弄反了，这里修正过来
+			$(wordtmp).find("[name='roma']").html(data.roma);  //罗马音
+			$(wordtmp).find("[name='sd']").html(data.sd);  //　声调 0
+			$(wordtmp).find("[name='fyf']").val(data.fyf); //明细隐藏域
+			$(wordtmp).find("[name='fyfdetail']").html(data.fyf.split("\n").join("<br>"));
 
-		$(container).attr("info",JSON.stringify(data));
+			$(wordtmp).attr("info",JSON.stringify(data));
+			$(wordtmp).insertAfter($(container).find(".wordpaneltitlebar"))
+		});
+
+		
 	}
-
-	
-
-	initWordStatus(data.word);
 	return container;
-
 }
 
 chrome.runtime.onMessage.addListener(
@@ -191,10 +173,12 @@ chrome.runtime.onMessage.addListener(
 		$(container).css("top",pageY);
 		$("html").append($(container));
 
-		if(!$(container).attr("info")) return;
+		// if(!$(container).attr("info")) return;
+		if(request.val.length == 0) return;
 
-		var info = $.parseJSON($(container).attr("info"))
-
+		
+		var info = $.parseJSON($(container).find(".wordmempanel_word").first().attr("info"));
+		initWordStatus(info.word);
 		DB.exist(info["word"],function(exist,data){
 			
 			if(exist && data.context){
@@ -240,7 +224,7 @@ document.addEventListener("mouseup", function(e) {
 function initWordStatus(word){
 
 	if(!word) return;
-	var json = getCurrentPanelWordInfo();
+	var json = getCurrentPanelWordInfo()[0];
 
 	DB.syncGet(word).then(function(items) {
 
@@ -278,32 +262,27 @@ $(document).delegate("#hjd_addword_image_1 img","click",function(){
 
 	var exists = $(this).attr("exists")
 
-	var json = getCurrentPanelWordInfo(this);
-
-	var context = $(this).parents(".wordmempanel").find("textarea").val()
-	json["context"] = context;
-
-	var data = {
-		"word":json.word,
-		"exists":exists
-	}
-
+	var jsonArr = getCurrentPanelWordInfo(this);
 	if(exists == 1){
-		chrome.storage.sync.remove(json.word, function(items) {
-			initWordStatus(json.word);
+		chrome.storage.sync.remove(jsonArr[0].word, function(items) {
+			initWordStatus(jsonArr[0].word);
 		});
-
 	}else{
 
-		var wordkey = json["word"];
-		var timestamp = new Date().getTime();
-		json.timestamp = timestamp;
-		var syndata = {}
-		var wordkey = json.word;
-		syndata[wordkey] = json;
+		var savejson = jsonArr[0];
+		var context = $(this).parents(".wordmempanel").find("textarea").val();
+		savejson.context = context;
+		savejson.timestamp = new Date().getTime();
+		//添加同时查出的意思
+		savejson.linkwordsinfo =  jsonArr.filter(function(v,i){
+			return i>0;
+		});
+		var syndata = {};
+		var wordkey = savejson.word;
+		syndata[wordkey] = savejson;
 
 		DB.syncSet(syndata).then(function(result){
-			initWordStatus(json.word);
+			initWordStatus(wordkey);
 		});
 	}
 
@@ -336,13 +315,13 @@ for (key in changes) {
 
 function getCurrentPanelWordInfo(eltInPanel){
 
-
 	var parentDiv = pluginPageManager.getTopPanel();
 	if(!parentDiv) return;
-	var info = $(parentDiv).attr("info")
-	if(!info) return;
-	var infojson = $.parseJSON(info)
-	return infojson;
+	var contextArr = $(parentDiv).find(".wordmempanel_word").not("#wordmempanel_word_tmp").toArray().reduce(function(acc,v){
+		acc.push($.parseJSON($(v).attr("info")));
+		return acc;
+	},[])
+	return contextArr;
 }
 
 $(document).delegate(".panelLock", "click", function(){

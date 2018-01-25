@@ -7,6 +7,7 @@
 
 .wordmempanel {
     min-width: 266px; 
+    max-width: 600px;
     font-size:12px;
     padding: 10px;
     

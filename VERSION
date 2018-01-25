@@ -14,7 +14,7 @@ v1.5.3
 	v1.5.3.0 (a)将content.JS添加到background中，让options页面也能showquerypanel
 			 (b)querypanel position改成fixed，滚动页面也不消失
 			 (c)添加导出历史功能
-			 
-TODO　需要完善，查询单词有多个内容时，只显示了第一个，如这个词 稲
+	v1.5.3.1 (a) panel 最大の広さを設定します			
+			 (b)查询单词有多个内容时，只显示了第一个，如这个词 稲(完成)
 
 

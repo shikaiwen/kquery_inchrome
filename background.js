@@ -19,18 +19,6 @@ chrome.contextMenus.create({
 });
 
 
-var chromeInFocus = true;  // global boolean to keep track of state
-chrome.windows.onFocusChanged.addListener(function(window) {
-
-    // alert(window.focused)
-    // if (window == chrome.windows.WINDOW_ID_NONE) {
-    //     chromeInFocus = false;
-    // } else {
-    //     chromeInFocus = true;
-    // }
-});
-
-
 
 
 chrome.commands.onCommand.addListener(function(command) {
@@ -209,7 +197,28 @@ function doQuery(word, callback){
           neededHtml = neededHtml.replace(""+replaceArr[i], "\"" + replaceArr[i] + "\"")
         }
 
-        callback(neededHtml);
+
+        var htmlCnt = $.parseJSON(unicodeToChar(neededHtml)).content;
+        var container = $("<div>").html(htmlCnt);
+
+var headerElt = $(container).find(".hjd_Green");
+var wordInfoArr = [];
+$(headerElt).each(function(i,v){
+  //日文假名， 沪江词典命名弄反了，这里修正过来
+  var data = {};
+  
+  data.word = $(this).find("font").html();
+  data.roma = $(this).nextAll("[title*=假名]").first().html()
+  data.jm = $(this).nextAll("[title*=罗马音]").first().html()
+  data.sd = $(this).nextAll("[title*=声调]").first().html()
+  data.fyf = $(this).nextAll("[id*=hjd_wordcomment]").first().val()
+  // neededHtml = unicodeToChar(neededHtml) 
+  wordInfoArr.push(data);
+});
+
+  // word(单词) jm(英文假名) roma(日语读音) sd(声调) fyf(说明内容，用换行符号分割)
+
+        callback(wordInfoArr);
 
     });
 
