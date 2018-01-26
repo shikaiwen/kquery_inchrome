@@ -56,18 +56,25 @@ pluginPageManager.getTopPanel = function(){
 	return list.length >0 ? list[list.length -1] : null ;
 }
 
+
+pluginPageManager.getQueryPanel = function(){
+	var id ="querypanel";
+	return $("#"+id);
+}
+
 function showQueryPanel(){
 
-	if($("#querypanel").length >0)return;
+	if(QueryPanel.elt) return;
 	$(document).delegate("#querypanel #closeIcon img", "click", function(){
-		$("#querypanel").remove();
+		QueryPanel.elt.remove();
 	});
 
-	var panel = pluginPageManager.newQueryPanel()
+	var panel = pluginPageManager.newQueryPanel();
+
+	QueryPanel.elt = panel;
 
 	$(panel).css("left",pageX);
 	$(panel).css("top",clientY);
-
 
 	// $(panel).append(templates.panelstyletemp);
 	
@@ -81,6 +88,8 @@ function showQueryPanel(){
 	  handle: $('.qptitlebar', draggableDiv)
 	});
 
+	nav = new QueryNavigator();
+	nav.init();
 
 }
 
@@ -108,13 +117,104 @@ $(document).delegate(".contextLink", "click",function(e){
 		}
 });
 
+var QueryPanel = {};
+QueryPanel.elt;
+QueryPanel.reset = function(){
+	QueryPanel.elt.find($("[name~=wordmempanel_]")).remove();
+}
+
+
+function QueryNavigator(){
+	this.holder = [];
+	this.preElt =  $("#arrow_back");
+	this.nextElt = $("#arrow_forward");
+	this.curIndex = -1;
+
+	this.init = function(){
+
+		var that = this;
+		$(this.preElt).click(function(){
+			if(--that.curIndex <= 0){
+				that.curIndex = 0;
+			}
+
+			QueryPanel.reset();
+			QueryPanel.find("#queryResultCnt").children().remove().append(this.holder[that.curIndex]);
+
+			that.refreshNav();
+		});
+
+		$(this.nextElt).click(function(){
+			++that.curIndex;
+			if(that.holder.length == 0){
+				that.curIndex = 0;
+			}else if(that.curIndex >= that.holder.length){
+				that.curIndex = that.holder.length;
+			}
+			that.refreshNav();
+		});
+
+		this.refreshNav();
+	}
+
+	this.evthandler = function(word, container){
+	}
+
+	this.enable = function(elt){
+		$(elt).css("color","");
+		$(elt).on("mouseenter",function(){
+			   $(this).css("background-color", "rgb(206, 202, 202)");
+		}).on("mouseleave", function(){
+				$(this).css("background-color", "");
+		});
+	}
+
+	this.disable = function(elt){
+		$(elt).css("color","rgba(0, 0, 0, 0.26)");
+		 $(this).css("background-color", "");
+		$(elt).off("mouseenter").off("mouseleave");
+	}
+	
+	this.addResult = function(word,rescontainer){
+
+		var lastone = this.holder[this.holder.length -1];
+		if(lastone && word == lastone.word) return;
+		this.holder.push({word:word,container:rescontainer});
+		this.curIndex++;
+
+		this.refreshNav()
+	}
+
+	this.refreshNav = function(){
+
+		if(this.holder.length == 0){
+			this.disable(this.preElt);
+			this.disable(this.nextElt);
+			return;
+		}
+
+		this.enable(this.preElt);
+		this.enable(this.nextElt);
+
+
+		if(this.curIndex == 0){
+			this.disable(this.preElt);
+		}
+		if(this.curIndex == (this.holder.length-1)){
+			this.disable(this.nextElt);
+		}
+		
+	}
+
+}
 
 function queryPanelQuery(word){
 	datatube.front.request_queryWord(word,function(request){
-		var container = renderQueryResult(request)
-		$(container).removeClass("wordmempanel")
+		var container = renderQueryResult(request);
+		$(container).removeClass("wordmempanel");
 		$("#querypanel #queryResultCnt").html(container);
 
+		nav.addResult(word, container);
 
 		if(!$(container).attr("info")) return;
 

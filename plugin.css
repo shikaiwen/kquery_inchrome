@@ -74,3 +74,34 @@
 #queryResultCnt{
 	margin-top: 10px;
 }
+
+.navtt{
+    float: left;
+    cursor: default;
+}
+.navtt span{
+    cursor: pointer;
+    /*font-size: 20px;*/
+}
+
+#arrow_back{
+    font-size: 20px;
+}
+
+
+#arrow_back .md-inactive {
+    color: rgba(0, 0, 0, 0.26);
+}
+#arrow_back .md-inactive:hover{
+    /*color: rgba(0, 0, 0, 0.26);*/
+}
+
+#arrow_forward{
+    font-size: 20px;   
+}
+
+
+
+.material-icons .md-20{
+
+}
