@@ -64,7 +64,7 @@ pluginPageManager.getQueryPanel = function(){
 
 function showQueryPanel(){
 
-	if(QueryPanel.elt) return;
+	// if(QueryPanel.elt) return;
 	$(document).delegate("#querypanel #closeIcon img", "click", function(){
 		QueryPanel.elt.remove();
 	});
@@ -90,6 +90,17 @@ function showQueryPanel(){
 
 	nav = new QueryNavigator();
 	nav.init();
+
+	getTodayWordContent(panel);
+}
+
+//获取今日词汇
+function getTodayWordContent(querypanel){
+	callback = function(wordinfo){
+		$(querypanel).find("#queryResultCnt").html(wordinfo);
+	}
+	datatube.front.request_getTodayWordContent(callback);
+
 
 }
 

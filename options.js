@@ -100,7 +100,7 @@ function doPageListRender(items,sortedKeyArr){
 	var sortedArr = new Array(items.length);
 
 	var cnt = 0;
-	var datacnt = []
+	var datacnt = [];
 
 	for(var i = sortedKeyArr.length-1 ; i>=0; i--){
 		var wordKey = sortedKeyArr[i];

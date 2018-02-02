@@ -24,34 +24,41 @@ datatube.front.request_queryWord = function(word, callback) {
 	});
 }
 
+datatube.front.request_getTodayWordContent = function(callback){
+	datatube.front.getTodayWordContent_callback = callback;
+	chrome.runtime.sendMessage({
+		"key": "getTodayWordContent",
+	});
+}
+
+
 
 datatube.front.handle_getSelectedText = function(){
-
 	return currentSelectedText;
-
 }
+
 
 
 //font end
 chrome.runtime.onMessage.addListener(
 	function(request, sender, sendResponse) {
 
-
-		if(request.key == "getSelectedText"){
-			chrome.runtime.sendMessage({
-				"key": "getSelectedTextResult",
-				"val": datatube.front.handle_getSelectedText()
-			});
-		}
-
-
+			if(request.key == "getSelectedText"){
+				chrome.runtime.sendMessage({
+					"key": "getSelectedTextResult",
+					"val": datatube.front.handle_getSelectedText()
+				});
+			}
 
 			// query result 
 			if(request.key == "queryWordFontEndResult"){
 				datatube.front.request_queryWord_callback(request.val);
 			}
 
-
+			//获取到今日词汇
+			if(request.key == "getTodayWordContent"){
+				datatube.front.getTodayWordContent_callback(request.val);
+			}
 
 		}
 	);
@@ -128,6 +135,52 @@ chrome.runtime.onMessage.addListener(
 
     }
 
+
+    if(request.key == "queryWordFontEnd"){
+    	doQuery(request.val, function(resultobj){
+			var reqData = {} 
+			reqData["key"] = "queryWordFontEndResult";
+			reqData["val"] = resultobj;
+			chrome.tabs.query({
+				active: true,
+				currentWindow: true
+			}, function(tabs) {
+				var activeTab = tabs[0];
+				chrome.tabs.sendMessage(activeTab.id, reqData);
+			});
+    	});
+
+    }
+
+    if(request.key == "getTodayWordContent"){
+
+    		var reqData = {}
+    		reqData.key = "getTodayWordContent"
+    		reqData.val = "背伸び";
+			chrome.tabs.query({
+				active: true,
+				currentWindow: true
+			}, function(tabs) {
+				var activeTab = tabs[0];
+				chrome.tabs.sendMessage(activeTab.id, reqData);
+			});
+
+			return;
+
+    	$.post("https://pythontest-191303.appspot.com/gettodayword",function(datas){
+
+
+			chrome.tabs.query({
+				active: true,
+				currentWindow: true
+			}, function(tabs) {
+				var activeTab = tabs[0];
+				chrome.tabs.sendMessage(activeTab.id, reqData);
+			});
+
+    	});
+    }
+    
 	// var info = request.msg;
 
 	// chrome.tabs.query({
