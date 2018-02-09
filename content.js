@@ -150,7 +150,7 @@ function QueryNavigator(){
 			}
 
 			QueryPanel.reset();
-			QueryPanel.find("#queryResultCnt").children().remove().append(this.holder[that.curIndex]);
+			QueryPanel.elt.find("#queryResultCnt").children().remove().append(this.holder[that.curIndex]);
 
 			that.refreshNav();
 		});

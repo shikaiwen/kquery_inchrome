@@ -13,14 +13,14 @@
   "background":{
       "css": ["plugin.css"],
       "scripts":[
-        "background.js",
         "jquery-1.12.4.js",
         "datatube.js",
         "jquery-ui/jquery-ui.js",
         "storage.js",
         "proper.js",
         "bootstrap4/js/bootstrap.js",
-        "datatables/datatables.js"
+        "datatables/datatables.js",
+        "background.js"
       ]
   },
   "content_scripts":[

@@ -1,5 +1,9 @@
 
 
+String.prototype.trimAll = function(){
+  var str = this.replace(/\s/g, "")
+  return str;
+}
 
 // Create a parent item and two children.
 var parent = chrome.contextMenus.create({
@@ -187,31 +191,38 @@ function doQuery(word, callback){
     var url = "https://dict.hjenglish.com/services/simpleExplain/jp_simpleExplain.ashx?type=jc&w="+word;
     // chrome.tabs.create({"url": url});
     // alert("background.js "+ JSON.stringify(request))
+    var url = "https://dict.hjenglish.com/jp/jc/"+ word
 
     $.post(url,function(xhr){
-        var neededHtml = xhr.substr(xhr.indexOf("{"),xhr.lastIndexOf("}") - xhr.indexOf("{") +1)
-        
 
-        var replaceArr = ["content","IfHasScb","hjd_langs","WordId","FromLang","ToLang"]
-        for (var i = 0; i < replaceArr.length; i++) {
-          neededHtml = neededHtml.replace(""+replaceArr[i], "\"" + replaceArr[i] + "\"")
-        }
+        // var neededHtml = xhr.substr(xhr.indexOf("{"),xhr.lastIndexOf("}") - xhr.indexOf("{") +1)
+        // var replaceArr = ["content","IfHasScb","hjd_langs","WordId","FromLang","ToLang"]
+        // for (var i = 0; i < replaceArr.length; i++) {
+        //   neededHtml = neededHtml.replace(""+replaceArr[i], "\"" + replaceArr[i] + "\"")
+        // }
+        // var htmlCnt = $.parseJSON(unicodeToChar(neededHtml)).content;
+        // var container = $("<div>").html(htmlCnt);
 
+  var headerElt = $(container).find(".hjd_Green");
+  var wordInfoArr = [];
 
-        var htmlCnt = $.parseJSON(unicodeToChar(neededHtml)).content;
-        var container = $("<div>").html(htmlCnt);
-
-var headerElt = $(container).find(".hjd_Green");
-var wordInfoArr = [];
-$(headerElt).each(function(i,v){
+    $(headerElt).each(function(i,v){
   //日文假名， 沪江词典命名弄反了，这里修正过来
   var data = {};
-  
   data.word = $(this).find("font").html();
   data.roma = $(this).nextAll("[title*=假名]").first().html()
   data.jm = $(this).nextAll("[title*=罗马音]").first().html()
   data.sd = $(this).nextAll("[title*=声调]").first().html()
   data.fyf = $(this).nextAll("[id*=hjd_wordcomment]").first().val()
+
+
+var data = {}
+data.word = $(".word-details-pane").eq(0).find(".word-info .word-text").text().trimAll();
+data.jm = $(".word-details-pane").eq(0).find(".word-info .pronounces span").eq(0).text().trimAll();
+data.roma =$(".word-details-pane").eq(0).find(".word-info .pronounces span").eq(1).text().trimAll();
+data.sd = $(".word-details-pane").eq(0).find(".word-info .pronounces span").eq(2).text().trimAll();
+// data.fyf = 
+
   // neededHtml = unicodeToChar(neededHtml) 
   wordInfoArr.push(data);
 });
@@ -223,6 +234,58 @@ $(headerElt).each(function(i,v){
     });
 
 
+}
+
+$(function(){
+  dataHandle()  
+})
+
+// html page data handle
+function dataHandle(xhr,callback){
+
+    var url = "https://dict.hjenglish.com/jp/jc/留まる"
+
+    $.get(url,function(xhr){
+        var context = $(xhr);
+        var result = [];
+
+        context.find(".word-details-pane").each(function(){
+          var data = {};
+          data.word = $(this).find(".word-info .word-text").text().trimAll();
+          data.jm = $(this).find(".word-info .pronounces span").eq(0).text().trimAll();
+          data.roma = $(this).find(".word-info .pronounces span").eq(1).text().trimAll();
+          data.sd = $(this).find(".word-info .pronounces span").eq(2).text().trimAll();
+          data.wordtype = $(this).find(".simple span").eq(0).text().trimAll();
+          data.simpleDefinition = $(this).find(".simple span").eq(1).text().trimAll();
+            // data.fyf = 
+            // [{word}]
+        // data.sentences = {"意味１":[{},{}]],"意味２":[{},{}]]}
+          var sens = {};
+          $(this).find(".word-details-item .detail-groups dd").each(function(){
+            var meaning = $(this).find("h3").text().trimAll();
+            var sentencesArr = $(this).find("ul li").toArray().reduce(function(acc, v, i){
+                var fromSentence = $(v).find("p").eq(0).text().trimAll();
+                var toSentence = $(v).find("p").eq(1).text().trimAll();
+                var senitem = {};
+                senitem[fromSentence] = toSentence;
+                acc.push(senitem);
+                return acc;
+            }, []);
+
+            sens[meaning] = sentencesArr;
+          });
+          
+          data.sentences = sens;
+
+          result.push(data);
+        });
+
+        callback(result)
+    });
+
+
+
+  
 }
 
 
