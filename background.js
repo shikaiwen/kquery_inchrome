@@ -166,8 +166,6 @@ var getTextNodesIn = function(el) {
 
 
 
-
-
 function toQuery(text){
   if(!$.trim(text)) return;
 
@@ -188,6 +186,11 @@ function toQuery(text){
 
 function doQuery(word, callback){
 
+
+    if(true){
+      dataHandle(word,callback)
+      return;
+    }
     var url = "https://dict.hjenglish.com/services/simpleExplain/jp_simpleExplain.ashx?type=jc&w="+word;
     // chrome.tabs.create({"url": url});
     // alert("background.js "+ JSON.stringify(request))
@@ -237,13 +240,13 @@ data.sd = $(".word-details-pane").eq(0).find(".word-info .pronounces span").eq(2
 }
 
 $(function(){
-  dataHandle()  
+  // dataHandle("点滅");
 })
 
 // html page data handle
-function dataHandle(xhr,callback){
+function dataHandle(word,callback){
 
-    var url = "https://dict.hjenglish.com/jp/jc/留まる"
+    var url = "https://dict.hjenglish.com/jp/jc/"+word
 
     $.get(url,function(xhr){
         var context = $(xhr);
@@ -255,25 +258,30 @@ function dataHandle(xhr,callback){
           data.jm = $(this).find(".word-info .pronounces span").eq(0).text().trimAll();
           data.roma = $(this).find(".word-info .pronounces span").eq(1).text().trimAll();
           data.sd = $(this).find(".word-info .pronounces span").eq(2).text().trimAll();
-          data.wordtype = $(this).find(".simple span").eq(0).text().trimAll();
-          data.simpleDefinition = $(this).find(".simple span").eq(1).text().trimAll();
-            // data.fyf = 
-            // [{word}]
-        // data.sentences = {"意味１":[{},{}]],"意味２":[{},{}]]}
-          var sens = {};
-          $(this).find(".word-details-item .detail-groups dd").each(function(){
-            var meaning = $(this).find("h3").text().trimAll();
-            var sentencesArr = $(this).find("ul li").toArray().reduce(function(acc, v, i){
-                var fromSentence = $(v).find("p").eq(0).text().trimAll();
-                var toSentence = $(v).find("p").eq(1).text().trimAll();
-                var senitem = {};
-                senitem[fromSentence] = toSentence;
-                acc.push(senitem);
-                return acc;
-            }, []);
+          data.wordtype = $(this).find(".simple").children().eq(0).text().trimAll();
 
-            sens[meaning] = sentencesArr;
-          });
+          data.wordmeaningdesc = $(this).find(".simple ul").children().toArray().reduce(function(a,v){
+            a.push($(v).text());
+            return a;
+          },[]);
+          
+
+        // data.sentences = {"意味１":[{},{}]],"意味２":[{},{}]]}
+
+          // 不做解析了，让前台跳转到链接去
+          var sens = {};
+          // $(this).find(".word-details-item .detail-groups dd").each(function(){
+          //   var meaning = $(this).find("h3").text().trimAll();
+          //   var sentencesArr = $(this).find("ul li").toArray().reduce(function(acc, v, i){
+          //       var fromSentence = $(v).find("p").eq(0).text().trimAll();
+          //       var toSentence = $(v).find("p").eq(1).text().trimAll();
+          //       var senitem = {};
+          //       senitem[fromSentence] = toSentence;
+          //       acc.push(senitem);
+          //       return acc;
+          //   }, []);
+          //   sens[meaning] = sentencesArr;
+          // });
           
           data.sentences = sens;
 
@@ -282,8 +290,6 @@ function dataHandle(xhr,callback){
 
         callback(result)
     });
-
-
 
   
 }

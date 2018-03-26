@@ -250,22 +250,25 @@ function queryPanelQuery(word){
 function renderQueryResult(dataArr){
 
 
+    var url = "https://dict.hjenglish.com/jp/jc/";
 	if(dataArr.length == 0){
 		container = pluginPageManager.nowordpaneltemp();
 	}else{
 		var container = pluginPageManager.newWordPanel() 
+		
 		// 今、ダータをとったまま、設置します
 		dataArr.forEach(function(data,i){
+			$(container).find("#wordlink").attr("href",url + data.word);
 			var wordtmp = $(container).find("#wordmempanel_word_tmp").clone().attr("id","").show();
 			$(wordtmp).find("[name='word']").html(data.word);	//单词
 			$(wordtmp).find("[name='jm']").html(data.jm);   //日文假名， 沪江词典命名弄反了，这里修正过来
 			$(wordtmp).find("[name='roma']").html(data.roma);  //罗马音
 			$(wordtmp).find("[name='sd']").html(data.sd);  //　声调 0
 			$(wordtmp).find("[name='fyf']").val(data.fyf); //明细隐藏域
-			$(wordtmp).find("[name='fyfdetail']").html(data.fyf.split("\n").join("<br>"));
+			$(wordtmp).find("[name='fyfdetail']").html(data.wordmeaningdesc);
 
 			$(wordtmp).attr("info",JSON.stringify(data));
-			$(wordtmp).insertAfter($(container).find(".wordpaneltitlebar"))
+			$(wordtmp).insertAfter($(container).find(".wordpaneltitlebar"));
 		});
 
 		
